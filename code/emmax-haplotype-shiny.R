@@ -747,10 +747,10 @@ ui <- shinyUI(
                 label = "Snp Annotation \n(tab-delimed table with header, option)",
                 accept = c(".txt",".xls")
               ),
-              p("The first 3 columns is SNP.ID, Chr and Position. which needs to be completely consistent with the genotype file.",
+              p("The first 3 columns is SNP.ID, Chr and Position. The column name of the column where the gene is located must be 「Gene」. Besides, the SNP id needs to be completely consistent with the genotype file.",
                 style = "color: #7a8788;font-size: 12px; font-style:Italic"),
               textInput(inputId = "regions",label = "regions or SNP id",value = "11:100000-200000"),
-              actionButton(inputId = "Data format check",label = "confirm parameters",icon = icon("check"))
+              actionButton(inputId = "status_check",label = "confirm parameters",icon = icon("check"))
             )
         ),
         mainPanel(
@@ -773,66 +773,90 @@ ui <- shinyUI(
                 DT::dataTableOutput("snpAnno_tbl")
               ),
               tabPanel(
-                title = "Selected SNPs",height = "500px",width ="100%",
-                icon = icon("paperclip"),
-                tags$h3("Choose snps",style = 'color: #008080'),
-                hr_main,
-                selectInput(
-                  inputId = "SNPs",
-                  label = "Select SNPs",
-                  choices = c("..."),
-                  selected = "...",
-                  multiple = T
+                title = "Candidate gene expression profile",height = "500px",width ="100%",
+                icon = icon("image"),
+                div(id = "parameters2",
+                    style = "position: fixed;
+                           top: 120px; right: -300px; width: 300px; height: 80%;
+                           background-color: #f7f7f7; border: 1.5px solid #008080; overflow-y: scroll;
+                           ; border-top-left-radius: 10px; border-bottom-left-radius: 10px; padding: 20px;",
+                    h3("Color key",style = "color:#darkgreen"),
+                    hr_main,
+                    colourInput(
+                      inputId = "col_min",
+                      label = "min",
+                      value = "blue"
+                    ),
+                    hr_head,
+                    colourInput(
+                      inputId = "col_mid",
+                      label = "mid",
+                      value = "white"
+                    ),
+                    hr_head,
+                    colourInput(
+                      inputId = "col_max",
+                      label = "max",
+                      value = "red"
+                    ),
+                    hr_head,
+                    textInput(
+                      inputId = "col_break",
+                      label = 'break',
+                      value = "-2,0,2"
+                    ),
+                    h3("Show names",style = "color:#darkgreen"),
+                    hr_main,
+                    radioButtons(
+                      inputId = 'show_colname',
+                      label = "show column names",
+                      choices = c("TRUE","FALSE"),
+                      selected = "TRUE"
+                    ),
+                    hr_head,
+                    radioButtons(
+                      inputId = 'show_rownames',
+                      label = "show row names",
+                      choices = c("TRUE","FALSE"),
+                      selected = "TRUE"
+                    ),
+                    hr_head,
+                    radioButtons(
+                      inputId = "cluster_col",
+                      label = "cluster column",
+                      choices = c("TRUE","FALSE"),
+                      selected = 'FALSE'),
+                    hr_head,
+                    radioButtons(
+                      inputId = 'cluster_col',
+                      label = "cluster row",
+                      choices = c("TRUE","FALSE"),
+                      selected = "TRUE"
+                    )
                 ),
-                radioButtons(
-                  inputId = "heter",
-                  label = "Contain heter snps",
-                  choices = c("FALSE","TRUE"),
-                  selected = "FALSE"
-                ),
-                actionButton(inputId = "get_snp",label = "confirm selection",icon = icon("check")),
-                tags$h3("Check SNPs",style = 'color: #008080'),
-                hr_main,
-                DT::dataTableOutput(outputId = "checkSNPs"),
-                downloadButton(
-                  outputId = "down_tbl_03",
-                  label = "Download",
-                  icon = icon('download')
-                ),
-                tags$h3("Start",style = 'color: #008080'),
-                p("We will remove haplotypes that have only 1 sample.",
-                  style = "color: blue;font-size: 13px; font-style:Italic"),
-                hr_main,
-                actionButton(inputId = "showfig2",label = "Show figure"),
-                tags$h3("Different analysis result",style = 'color: #008080'),
-                hr_main,
-                DT::dataTableOutput("DA_tbl2"),
-                downloadButton(
-                  outputId = "down_tbl_04",
-                  label = "Download",
-                  icon = icon('download')
-                ),
-                tags$h3("Plot",style = 'color: #008080'),
+                div(actionButton("para_select2", "Show | Hide",icon = icon(name = 'option-vertical',lib = 'glyphicon')),
+                    style = "margin-bottom: 15px;"),
+                actionButton(inputId = "ht_para2",label = "Confirm heatmap parameter."),
+                tags$h3("Show heatmap",style = 'color: #008080'),
                 hr_main,
                 jqui_resizable(
-                  plotOutput("DA_plt2")
+                  plotOutput("expmat_ht")
                 ),
-                textInput(inputId = "width2",
-                          label = "width",
-                          value = 10),
-                textInput(inputId = "height2",
-                          label = "height",
-                          value = 10),
-                actionButton(
-                  inputId = 'adjust2',
-                  label = "Set fig size",
-                  icon = icon('check')
-                ),
-                downloadButton(
-                  outputId = "down_plt_02",
-                  label = "Download",
-                  icon = icon('image')
-                )
+                tags$script("
+                        function toggleParameters2() {
+                          var div = document.getElementById('parameters2');
+                          var right = div.style.right;
+                          if (right === '-300px') {
+                            div.style.right = '0px';
+                            div.style.transition = 'right 0.8s ease-in-out';
+                            return;
+                          } else if (right === '0px') {
+                            div.style.right = '-300px';
+                            div.style.transition = 'right 0.8s ease-in-out';
+                            return;
+                          }
+                        }
+                      ")
               )
             )
           )
@@ -852,6 +876,10 @@ server <- function(input,output,session) {
 
   observeEvent(input$para_select1,{
     shinyjs::runjs('toggleParameters();')
+  })
+
+  observeEvent(input$para_select2,{
+    shinyjs::runjs('toggleParameters2();')
   })
   genofile <- reactive({
     file1 <- input$genopath
@@ -1361,6 +1389,49 @@ server <- function(input,output,session) {
     },
     content = function(file) {
       ggsave(filename = file,plot = snp_obj$da_res$plt,width = download$width2,height = download$height2)
+    }
+  )
+
+  ##> heatmap plot
+  expmatFile <- reactive({
+    file5 <- input$ExpMat
+    if(is.null(file6)){return()}
+    read.delim(file = file6$datapath,header = T)
+  })
+  snpAnnoFile <- reactive({
+    file5 <- input$SnpAnno
+    if(is.null(file7)){return()}
+    read.delim(file = file7$datapath,header = T)
+  })
+  p3_obj <- reactiveValues(data=NULL)
+  ##>
+  observeEvent(
+    input$status_check,
+    {
+      if(is.null(expmatFile())) {return()}
+      if(is.null(snpAnnoFile())) {return()} else {ps_obj$snpAnno = snpAnnoFile()}
+      p3_obj$expmat = expmatFile()
+      ps_obj$regions = input$regions
+      ps_obj$snpAnno_extract = list()
+      output$ExpmatCheck = renderUI({
+        progress_status = c(
+          "Step1. Summary of Heatmap database.",
+          "Step2. Summary of SNP annotation file",
+          "Step3. Extract target region from SNP annotation",
+          "Step4. Extract genes expression data by target region"
+        )
+        withProgress(
+          message = "Check Status",value = 0,
+          expr = {
+            for (i in 1:4) {
+              incProgress(1/4,progress_status[i])
+              if(i == 1) {
+
+              }
+            }
+          }
+        )
+      })
     }
   )
 
