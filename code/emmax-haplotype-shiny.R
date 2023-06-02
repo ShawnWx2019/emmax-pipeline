@@ -747,9 +747,13 @@ ui <- shinyUI(
                 label = "Snp Annotation \n(tab-delimed table with header, option)",
                 accept = c(".txt",".xls")
               ),
-              p("The first 3 columns is SNP.ID, Chr and Position. The column name of the column where the gene is located must be 「Gene」. Besides, the SNP id needs to be completely consistent with the genotype file.",
+              p("The first 3 columns is SNP.ID, Chr and Position. MUST contain gene id with the column name「Gene」. Besides, the SNP id needs to be completely consistent with the genotype file.",
                 style = "color: #7a8788;font-size: 12px; font-style:Italic"),
               textInput(inputId = "regions",label = "regions or SNP id",value = "11:100000-200000"),
+              radioButtons(inputId = "anno_format",
+                           label = "SNP annotation format",
+                           choices = c("vep","customized"),
+                           selected = 'vep'),
               actionButton(inputId = "status_check",label = "confirm parameters",icon = icon("check"))
             )
         ),
@@ -764,7 +768,6 @@ ui <- shinyUI(
                 tags$h3("Status",style = 'color: #008080'),
                 hr_main,
                 htmlOutput("ExpmatCheck"),
-                htmlOutput("SNPannoCheck"),
                 tags$h3("Expression matrix",style = 'color: #008080'),
                 hr_main,
                 DT::dataTableOutput("expmat_tbl"),
@@ -1394,12 +1397,12 @@ server <- function(input,output,session) {
 
   ##> heatmap plot
   expmatFile <- reactive({
-    file5 <- input$ExpMat
+    file6<- input$ExpMat
     if(is.null(file6)){return()}
     read.delim(file = file6$datapath,header = T)
   })
   snpAnnoFile <- reactive({
-    file5 <- input$SnpAnno
+    file7 <- input$SnpAnno
     if(is.null(file7)){return()}
     read.delim(file = file7$datapath,header = T)
   })
@@ -1409,10 +1412,16 @@ server <- function(input,output,session) {
     input$status_check,
     {
       if(is.null(expmatFile())) {return()}
-      if(is.null(snpAnnoFile())) {return()} else {ps_obj$snpAnno = snpAnnoFile()}
+      if(is.null(snpAnnoFile())) {return()} else {p3_obj$snpAnno = snpAnnoFile()}
       p3_obj$expmat = expmatFile()
-      ps_obj$regions = input$regions
-      ps_obj$snpAnno_extract = list()
+      p3_obj$regions = input$regions
+      p3_obj$snpAnno_extract = list()
+      p3_obj$snpAnno_check1 = list()
+      p3_obj$snpAnno_check2 = list()
+      p3_obj$expmat_extract = list()
+      p3_obj$heat_check = list()
+      p3_obj$sample_list = list()
+      p3_obj$anno_format = as.character(input$anno_format)
       output$ExpmatCheck = renderUI({
         progress_status = c(
           "Step1. Summary of Heatmap database.",
@@ -1426,16 +1435,134 @@ server <- function(input,output,session) {
             for (i in 1:4) {
               incProgress(1/4,progress_status[i])
               if(i == 1) {
-
+                p3_obj$heat_check = paste0("<font color = red><b>Success ==> </font></b><font color = purple>Gene number ==> </font> <font color = red> <b>",nrow(p3_obj$expmat),"</font></b>. <font color = purple>Sample number: </font> <font color = red> <b>",ncol(p3_obj$expmat),"</font></b>.")
+              } else if (i == 2) {
+                if(is.null(p3_obj$snpAnno)) {return()}
+                else if ("Gene" %in% colnames(p3_obj$snpAnno)) {
+                  p3_obj$snpAnno_check1 = paste0("<font color = red> <b>Success ==> </font></b> <font color = purple>Gene ID detected in SNP annotation file. The annotated gene number: </font> <font color = red> <b>",length(p3_obj$snpAnno %>% pull(Gene) %>% unique()),"</font></b>")
+                  if (!is.null(snp_obj$SNPs)) {
+                    if (!snp_obj$SNPs[1] %in% p3_obj$snpAnno) {
+                      p3_obj$snpAnno_check2 = "<font color = blue><b>Wanning ==> </font></b> <font color = purple> It seems that the SNP annotation file you provided does not correspond to the SNP id in your genotype file</font>"
+                    }
+                  } else {
+                    p3_obj$snpAnno_check2 = "<font color = red><b>Success ==> </font><b><font color = purple>File check pass!</font>"
+                  }
+                } else {
+                  p3_obj$snpAnno_check1 = "<font color = red><b>ERROR ==> </b></font><font color = purple>Make sure that the input SNP annotation file contains the Gene ID column, and the colname of this column must be</font> <font color = red><b>「Gene」</b></font>"
+                }
+              } else if ( i == 3) {
+                if(is.null(p3_obj$snpAnno)) {return()
+                } else {
+                  if(p3_obj$anno_format == "customized") {
+                    p3_obj$snpAnno_extract =  p3_obj$snpAnno %>%
+                      filter(colnames(.)[2] == str_extract(p3_obj$regions,"^\\d++(?=\\:)")) %>%
+                      filter(colnames(.)[3] >= str_extract(p3_obj$regions,"(?<=\\:).*(?=\\-)")) %>%
+                      filter(colnames(.)[3] <= str_extract(p3_obj$regions,"(?<=\\-).*$"))
+                  } else {
+                    p3_obj$snpAnno_extract =  p3_obj$snpAnno %>%
+                      mutate(chr = str_extract(Location,"^\\w++(?=\\:)"),
+                             pos = str_extract(Location,"(?<=\\:).*$")) %>%
+                      relocate(chr,.after = Location) %>%
+                      relocate(pos,.after = chr) %>%
+                      filter(chr == str_extract(p3_obj$regions,"^\\w++(?=\\:)")) %>%
+                      filter(pos >= str_extract(p3_obj$regions,"(?<=\\:).*(?=\\-)")) %>%
+                      filter(pos <= str_extract(p3_obj$regions,"(?<=\\-).*$"))
+                  }
+                }
+              } else if ( i == 4 ){
+                if (is.null(snp_obj$snpAnno)) {return()} else
+                  {
+                  p3_obj$expmat_extract =
+                    p3_obj$expmat %>%
+                    rename("Gene" = colnames(.)[1]) %>%
+                    inner_join(data.frame(Gene = p3_obj$snpAnno %>% pull(Gene)))
+                  }
               }
             }
           }
         )
+        isolate(HTML(
+          paste0("<font color = orange><b>Expression matrix check: </b></font>",p3_obj$heat_check,'<br/>
+                 <font color = orange><b>SNP annotation check: </font></b>',p3_obj$snpAnno_check1,'<br/>
+                 <font color = orange><b>SNP annotation check: </font></b>',p3_obj$snpAnno_check2)
+        ))
       })
     }
   )
 
+  output$expmat_tbl = DT::renderDataTable(
+    DT::datatable(
+      {
+        input$status_check
+        if(is.null(p3_obj$expmat)) {return()}
+        if (is.null(snp_obj$snpAnno)) {
+          p3_obj$expmat
+        } else {
+          p3_obj$expmat_extract
+        }
+      },
+      extensions = 'Buttons',
+      options = list(
+        autoWidth = T,
+        dom = 'Bfrtip',
+        scrollX = T,
+        lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
+        pageLength = 15,
+        scrollY = "400px",
+        buttons = list(
+          list(
+            extend = "collection",
+            text = 'Show All',
+            action = DT::JS("function ( e, dt, node, config ) {
+                                    dt.page.len(-1);
+                                    dt.ajax.reload();
+                                }")),
+          list(
+            extend = "collection",
+            text = 'Show Less',
+            action = DT::JS("function ( e, dt, node, config ) {
+                              dt.page.len(15);
+                              dt.ajax.reload();}")
+          )
+        )
+      )
+    )
+  )
 
+  output$snpAnno_tbl = DT::renderDataTable(
+    DT::datatable(
+      {
+        input$status_check
+        if(is.null(p3_obj$snpAnno)) {return()}
+        p3_obj$snpAnno_extract
+      },
+      extensions = 'Buttons',
+      options = list(
+        autoWidth = T,
+        dom = 'Bfrtip',
+        scrollX = T,
+        lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
+        pageLength = 15,
+        scrollY = "400px",
+        buttons = list(
+          list(
+            extend = "collection",
+            text = 'Show All',
+            action = DT::JS("function ( e, dt, node, config ) {
+                                    dt.page.len(-1);
+                                    dt.ajax.reload();
+                                }")),
+          list(
+            extend = "collection",
+            text = 'Show Less',
+            action = DT::JS("function ( e, dt, node, config ) {
+                              dt.page.len(15);
+                              dt.ajax.reload();}")
+          )
+        )
+      )
+    )
+  )
 
 }
 
