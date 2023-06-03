@@ -1455,7 +1455,7 @@ server <- function(input,output,session) {
                 } else {
                   if(p3_obj$anno_format == "customized") {
                     p3_obj$snpAnno_extract =  p3_obj$snpAnno %>%
-                      filter(colnames(.)[2] == str_extract(p3_obj$regions,"^\\d++(?=\\:)")) %>%
+                      filter(colnames(.)[2] == str_extract(p3_obj$regions,"^\\w++(?=\\:)")) %>%
                       filter(colnames(.)[3] >= str_extract(p3_obj$regions,"(?<=\\:).*(?=\\-)")) %>%
                       filter(colnames(.)[3] <= str_extract(p3_obj$regions,"(?<=\\-).*$"))
                   } else {
