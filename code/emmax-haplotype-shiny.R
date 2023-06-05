@@ -9,6 +9,7 @@ suppressMessages(if (!require('tidyverse')) install.packages('tidyverse'))
 suppressMessages(if (!require('devtools')) install.packages('devtools'))
 suppressMessages(if (!require("treeio")) devtools::install_github("YuLab-SMU/treeio"))
 suppressMessages(if (!require("ggtree")) devtools::install_github("YuLab-SMU/ggtree"))
+suppressMessages(if (!require("clusterProfiler")) devtools::install_github("YuLab-SMU/clusterProfiler"))
 suppressMessages(if (!require("ComplexHeatmap")) devtools::install_github("jokergoo/ComplexHeatmap"))
 suppressMessages(if (!require("InteractiveComplexHeatmap")) devtools::install_github("jokergoo/InteractiveComplexHeatmap"))
 suppressMessages(if (!require('ape')) install.packages('ape'))
@@ -749,6 +750,18 @@ ui <- shinyUI(
               ),
               p("The first 3 columns is SNP.ID, Chr and Position. MUST contain gene id with the column name「Gene」. Besides, the SNP id needs to be completely consistent with the genotype file.",
                 style = "color: #7a8788;font-size: 12px; font-style:Italic"),
+              fileInput(
+                inputId = "GeneAnno",
+                label = "Gene Annotation file\n(tab-delimed table with header, option)",
+                accept = c(".txt",".xls")
+              ),
+              fileInput(
+                inputId = "EnrichDB",
+                label = "Enrichment database\n(tab-delimed table with header, option)",
+                accept = c(".xlsx")
+              ),
+              p(".",
+                style = "color: #7a8788;font-size: 12px; font-style:Italic"),
               textInput(inputId = "regions",label = "regions or SNP id",value = "11:100000-200000"),
               radioButtons(inputId = "anno_format",
                            label = "SNP annotation format",
@@ -860,6 +873,10 @@ ui <- shinyUI(
                           }
                         }
                       ")
+              ),
+              tabPanel(
+                title = "Enrichment of candidate Gene",height = "500px",width ="100%",
+                icon = icon("slack"),
               )
             )
           )
