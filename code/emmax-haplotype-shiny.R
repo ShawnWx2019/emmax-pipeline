@@ -379,7 +379,7 @@ customLogo <- shinyDashboardLogoDIY(
   boldText = "ShawnLearnBioinfo"
   ,mainText = "Emmax-haplotype"
   ,textSize = 14
-  ,badgeText = "V0.0.6.230526"
+  ,badgeText = "V0.0.1"
   ,badgeTextColor = "white"
   ,badgeTextSize = 2
   ,badgeBackColor = "orange"
@@ -432,7 +432,7 @@ ui <- shinyUI(
                 style = "color: #7a8788;font-size: 12px; font-style:Italic"),
               fileInput(
                 inputId = "phenopath",
-                label = "phenotype file  (require)",
+                label = "phenotype file (require)",
                 accept = c(".txt",".xls",".xlsx")
               ),
               p("Sample ID in 1st column, traits in following column..",
@@ -734,7 +734,7 @@ ui <- shinyUI(
         div(id = "Sidebar3",
             sidebarPanel(
               width = 2,
-              tags$h3("Import database",style = 'color: #008080'),
+              tags$h3("Import Database",style = 'color: #008080'),
               hr_bar,
               fileInput(
                 inputId = "ExpMat",
@@ -750,19 +750,28 @@ ui <- shinyUI(
               ),
               p("The first 3 columns is SNP.ID, Chr and Position. MUST contain gene id with the column name「Gene」. Besides, the SNP id needs to be completely consistent with the genotype file.",
                 style = "color: #7a8788;font-size: 12px; font-style:Italic"),
+              tags$h3("Gene Function File",style = 'color: #008080'),
+              hr_bar,
               fileInput(
                 inputId = "GeneAnno",
-                label = "Gene Annotation file\n(tab-delimed table with header, option)",
-                accept = c(".txt",".xls")
+                label = "Gene Annotation file\n(.xlsx file, option)",
+                accept = c(".xlsx")
               ),
               fileInput(
                 inputId = "EnrichDB",
-                label = "Enrichment database\n(tab-delimed table with header, option)",
+                label = "Enrichment database\n(.xlsx file, option)",
                 accept = c(".xlsx")
               ),
-              p(".",
-                style = "color: #7a8788;font-size: 12px; font-style:Italic"),
-              textInput(inputId = "regions",label = "regions or SNP id",value = "11:100000-200000"),
+              HTML(
+                "<span style='color: #7a8788; font-size: 12px; font-style: italic;'>Sheet1 => Term2Gene-GO <br/></span>
+                 <span style='color: #7a8788; font-size: 12px; font-style: italic;'>Sheet2 => Term2Name2ONT-GO <br/></span>
+                 <span style='color: #7a8788; font-size: 12px; font-style: italic;'>Sheet3 => Term2Gene-KEGG <br/></span>
+                 <span style='color: #7a8788; font-size: 12px; font-style: italic;'>Sheet4 => Term2Name-KEGG <br/></span>
+                "
+              ),
+              tags$h3("Other Options",style = 'color: #008080'),
+              hr_bar,
+              textInput(inputId = "regions",label = "regions",value = "11:100000-200000"),
               radioButtons(inputId = "anno_format",
                            label = "SNP annotation format",
                            choices = c("vep","customized"),
@@ -844,7 +853,7 @@ ui <- shinyUI(
                       selected = 'FALSE'),
                     hr_head,
                     radioButtons(
-                      inputId = 'cluster_col',
+                      inputId = 'cluster_row',
                       label = "cluster row",
                       choices = c("TRUE","FALSE"),
                       selected = "TRUE"
@@ -877,6 +886,112 @@ ui <- shinyUI(
               tabPanel(
                 title = "Enrichment of candidate Gene",height = "500px",width ="100%",
                 icon = icon("slack"),
+                tags$h3("Import Gene list",style = 'color: #008080'),
+                hr_main,
+                HTML(
+                "<span style='color: blue; font-size: 13px; font-style: italic;'>
+                One gene ID per line, you can directly copy a column of Gene IDs from Excel and paste it into the input box below
+                <br/></span>
+                "
+                ),
+                textAreaInput(
+                  inputId = "GeneList",
+                  label = "Gene list",
+                  width = "100%",
+                  height = "200px",
+                  value = "Gene1\nGene2\nGene3",
+                  resize = 'vertical'
+                ),
+                hr_head,
+                div(id = "parameters3",
+                    style = "position: fixed;
+                           top: 120px; right: -300px; width: 300px; height: 80%;
+                           background-color: #f7f7f7; border: 1.5px solid #008080; overflow-y: scroll;
+                           ; border-top-left-radius: 10px; border-bottom-left-radius: 10px; padding: 20px;",
+                    h3("Color key",style = "color:#darkgreen"),
+                    hr_main,
+                    colourInput(
+                      inputId = "enrich_min",
+                      label = "qval min",
+                      value = "red"
+                    ),
+                    hr_head,
+                    colourInput(
+                      inputId = "enrich_max",
+                      label = "qval max",
+                      value = "blue"
+                    ),
+                    h3("Cutoff",style = "color:#darkgreen"),
+                    hr_main,
+                    sliderInput(
+                      inputId = "pval_cutoff",
+                      label = "Pvalue cutoff",
+                      min = 0,
+                      max = 1,
+                      value = 0.05
+                    ),
+                    hr_head,
+                    sliderInput(
+                      inputId = "qval_cutoff",
+                      label = "Qvalue cutoff",
+                      min = 0,
+                      max = 1,step = 0.01,
+                      value = 0.05
+                    ),
+                    hr_head,
+                    radioButtons(
+                      inputId = 'ONT',
+                      label = "ONT (for GO enrichment)",
+                      choices = c("BP","MF","CC","ALL"),
+                      selected = "ALL"
+                    ),
+                    h3("Plot setting",style = "color:#darkgreen"),
+                    hr_main,
+                    radioButtons(
+                      inputId = 'enrich_plt_type',
+                      label = "plot type",
+                      choices = c("dotplot","barplot"),
+                      selected = "dotplot"
+                    ),
+                    hr_head,
+                    sliderInput(
+                      inputId = "showCategory",
+                      label = "Number of terms in plot",
+                      min = 10,max = 100,value = 15 ,step = 5
+                    )
+                ),
+                div(actionButton("para_select3", "Show | Hide",icon = icon(name = 'option-vertical',lib = 'glyphicon')),
+                    style = "margin-bottom: 15px;"),
+                actionButton(inputId = "ht_para3",label = "Run enrichment analysis."),
+                tags$h3("GO Enrichment Result",style = 'color: #008080'),
+                hr_main,
+                DT::dataTableOutput("Annotation_tbl_go"),
+                hr_head,
+                jqui_resizable(
+                  plotOutput("Enrichment_plot_go")
+                ),
+                tags$h3("KEGG Enrichment Result",style = 'color: #008080'),
+                hr_main,
+                DT::dataTableOutput("Enrichment_tbl_kegg"),
+                hr_head,
+                jqui_resizable(
+                  plotOutput("Enrichment_plot_kegg")
+                ),
+                tags$script("
+                        function toggleParameters3() {
+                          var div = document.getElementById('parameters3');
+                          var right = div.style.right;
+                          if (right === '-300px') {
+                            div.style.right = '0px';
+                            div.style.transition = 'right 0.8s ease-in-out';
+                            return;
+                          } else if (right === '0px') {
+                            div.style.right = '-300px';
+                            div.style.transition = 'right 0.8s ease-in-out';
+                            return;
+                          }
+                        }
+                      ")
               )
             )
           )
@@ -888,19 +1003,36 @@ ui <- shinyUI(
 )
 
 
+# server fun --------------------------------------------------------------
+
+
 server <- function(input,output,session) {
+
+  # toggled sidebar and parameter box ---------------------------------------
+
   #> toggle side bar
   observeEvent(input$toggleSidebar, {
     shinyjs::toggle(id = "Sidebar")
   })
-
+  observeEvent(input$toggleSidebar2, {
+    shinyjs::toggle(id = "Sidebar2")
+  })
+  observeEvent(input$toggleSidebar3, {
+    shinyjs::toggle(id = "Sidebar3")
+  })
+  #> toggle parameters
   observeEvent(input$para_select1,{
     shinyjs::runjs('toggleParameters();')
   })
-
   observeEvent(input$para_select2,{
     shinyjs::runjs('toggleParameters2();')
   })
+  observeEvent(input$para_select3,{
+    shinyjs::runjs('toggleParameters3();')
+  })
+
+  # Part 01 data import and haplotype partitioning ------------------------------------------------
+    #> 1.1 data input -----
   genofile <- reactive({
     file1 <- input$genopath
     if(is.null(file1)){return()}
@@ -929,7 +1061,7 @@ server <- function(input,output,session) {
     if(is.null(file4)){return()}
     read.delim(file = file4$datapath,header = T)
   })
-  #> set reactiveValue
+    #> 1.2 pass input parameters to shiny app -----
   ht_obj <- reactiveValues(data=NULL)
   downloads <- reactiveValues(data = NULL)
   #> Set parameter
@@ -1001,6 +1133,7 @@ server <- function(input,output,session) {
       })
     }
   )
+  #> 1.3 draw heatmap -----
   observeEvent(
     input$ht_para,
     {
@@ -1096,7 +1229,7 @@ server <- function(input,output,session) {
                    })
     }
   )
-
+  #> 1.5 generate editable haplotype table to add haplotype information based on genotype heatmap. -----
   observeEvent(
     input$show_ht,
     {
@@ -1109,7 +1242,7 @@ server <- function(input,output,session) {
       })
     }
   )
-
+  #> 1.6 convert modified table to data.frame for next step. -----
   observeEvent(
     input$update_table,
     {
@@ -1130,7 +1263,7 @@ server <- function(input,output,session) {
       )
     }
   )
-
+  #> 1.7 check refomed haplotype data.frame -----
   output$check_haplotype = DT::renderDataTable(
     DT::datatable(
       {
@@ -1168,7 +1301,8 @@ server <- function(input,output,session) {
   )
 
 
-  ##> DA
+ # Part 02 Calculate the significance of phenotypic differences among haplotypes. --------
+  ##> 2.1 import sample group file and update "trait" and "snp" input selection-----
   DA_obj <- reactiveValues(data=NULL)
   groupFile <- reactive({
     file5 <- input$sample_group
@@ -1181,10 +1315,11 @@ server <- function(input,output,session) {
   observe({
     updateSelectInput(session,inputId = "SNPs",choices = ht_obj$geno_num$SNP)
   })
+  ##> 2.2 confirm parameters -----
   observeEvent(
     input$confirm2,
     {
-      DA_obj$group_table= list()
+      DA_obj$group_table = list()
       DA_obj$g_tbl = list()
       DA_obj$da_test = list()
       DA_obj$sig_tag = list()
@@ -1214,7 +1349,7 @@ server <- function(input,output,session) {
       )
     }
   )
-
+  ##> 2.3 run difference analysis -----
   observeEvent(
     input$showfig,
     {
@@ -1255,6 +1390,7 @@ server <- function(input,output,session) {
       DA_obj$plt_s <- DA_obj$hap_res$plt
     }
   )
+  ##> 2.4 Show output tables and plots. ------
   output$DA_tbl = DT::renderDataTable({
     input$showfig
     if(is.null(DA_obj$hap_res)){return()}
@@ -1271,7 +1407,7 @@ server <- function(input,output,session) {
     DA_obj$plt_s
   })
 
-  ##> SNPs
+  ##> 2.5 Select SNPs for new haplotype partition. -------
   snp_obj <- reactiveValues(data=NULL)
   observeEvent(
     input$get_snp,
@@ -1288,7 +1424,7 @@ server <- function(input,output,session) {
       )
     }
   )
-
+  ##> 2.6 run difference analysis based on snps haplotype -------
   observeEvent(
     input$showfig2,
     {
@@ -1300,13 +1436,12 @@ server <- function(input,output,session) {
       )
     }
   )
-
+  ##> 2.7 Show tables and plots -------
   output$checkSNPs = DT::renderDataTable({
     input$get_snps
     if(is.null(DA_obj$hap_res)) {return()}
     snp_obj$snps_tbl$geno_tbl2
   })
-
   output$DA_tbl2 = DT::renderDataTable({
     input$showfig2
     if(is.null(snp_obj$da_res)) {return()}
@@ -1318,10 +1453,10 @@ server <- function(input,output,session) {
     snp_obj$da_res$plt
   })
 
-  #> download
 
+# Part 03. Download result 01 ---------------------------------------------
   download <- reactiveValues(data=NULL)
-
+  #> 3.1 set figure size -----
   observeEvent(
     input$adjust1,
     {
@@ -1337,7 +1472,7 @@ server <- function(input,output,session) {
       download$height2 = as.numeric(input$width2)
     }
   )
-
+  #> 3.2  download tables ---------
   output$down_tbl_00 = downloadHandler(
 
     filename = function() {
@@ -1392,8 +1527,7 @@ server <- function(input,output,session) {
       writexl::write_xlsx(x = DA_obj$hap_res$tbl,path = file)
     }
   )
-
-
+  ##> 3.3 download figures -------
   output$down_plt_01 = downloadHandler(
     filename = function() {
       paste0("03.",DA_obj$trait,"-haplotype-all-regions.pdf")
@@ -1412,7 +1546,9 @@ server <- function(input,output,session) {
     }
   )
 
-  ##> heatmap plot
+
+# Part 04 Check expression profile and snp annotation of candidate regions --------
+  ##> 4.1 import file ------
   expmatFile <- reactive({
     file6<- input$ExpMat
     if(is.null(file6)){return()}
@@ -1423,100 +1559,137 @@ server <- function(input,output,session) {
     if(is.null(file7)){return()}
     read.delim(file = file7$datapath,header = T)
   })
+  GeneAnnoFile <- reactive({
+    file8 <- input$GeneAnno
+    if(is.null(file8)){return()}
+    readxl::read_xlsx(file = file8$datapath)
+  })
+  tryCatch(
+    {
+      t2g.go <- reactive({
+        file9 <- input$EnrichDB
+        if(is.null(file9)){return()}
+        readxl::read_xlsx(file = file9$datapath,sheet = 1)
+      })
+      t2n.go <- reactive({
+        file9 <- input$EnrichDB
+        if(is.null(file9)){return()}
+        readxl::read_xlsx(file = file9$datapath,sheet = 2)
+      })
+      t2g.kegg <- reactive({
+        file9 <- input$EnrichDB
+        if(is.null(file9)){return()}
+        readxl::read_xlsx(file = file9$datapath,sheet = 3)
+      })
+      t2n.kegg <- reactive({
+        file9 <- input$EnrichDB
+        if(is.null(file9)){return()}
+        readxl::read_xlsx(file = file9$datapath,sheet = 4)
+      })
+    },error = function(e) {
+      message("no enrichmnet database!")
+    }
+  )
+
+  ##> 4.2 check snp annotation --------
   p3_obj <- reactiveValues(data=NULL)
-  ##>
+
+  # observeEvent(
+  #   input$status_check,
+  #   {
+  #     if(is.null(expmatFile())) {return()}
+  #     if(is.null(snpAnnoFile())) {return()} else {p3_obj$snpAnno = snpAnnoFile()}
+  #     p3_obj$expmat = expmatFile()
+  #     p3_obj$regions = input$regions
+  #     p3_obj$snpAnno_extract = list()
+  #     p3_obj$snpAnno_check1 = list()
+  #     p3_obj$snpAnno_check2 = list()
+  #     p3_obj$expmat_extract = list()
+  #     p3_obj$heat_check = list()
+  #     p3_obj$sample_list = list()
+  #     p3_obj$anno_format = as.character(input$anno_format)
+  #     output$ExpmatCheck = renderUI({
+  #       progress_status = c(
+  #         "Step1. Summary of Heatmap database.",
+  #         "Step2. Summary of SNP annotation file",
+  #         "Step3. Extract target region from SNP annotation",
+  #         "Step4. Extract genes expression data by target region"
+  #       )
+  #       withProgress(
+  #         message = "Check Status",value = 0,
+  #         expr = {
+  #           for (i in 1:4) {
+  #             incProgress(1/4,progress_status[i])
+  #             if(i == 1) {
+  #               p3_obj$heat_check = paste0("<font color = red><b>Success ==> </font></b><font color = purple>Gene number ==> </font> <font color = red> <b>",nrow(p3_obj$expmat),"</font></b>. <font color = purple>Sample number: </font> <font color = red> <b>",ncol(p3_obj$expmat),"</font></b>.")
+  #             } else if (i == 2) {
+  #               if(is.null(p3_obj$snpAnno)) {return()}
+  #               else if ("Gene" %in% colnames(p3_obj$snpAnno)) {
+  #                 p3_obj$snpAnno_check1 = paste0("<font color = red> <b>Success ==> </font></b> <font color = purple>Gene ID detected in SNP annotation file. The annotated gene number: </font> <font color = red> <b>",length(p3_obj$snpAnno %>% pull(Gene) %>% unique()),"</font></b>")
+  #                 if (!is.null(snp_obj$SNPs)) {
+  #                   if (!snp_obj$SNPs[1] %in% p3_obj$snpAnno) {
+  #                     p3_obj$snpAnno_check2 = "<font color = blue><b>Wanning ==> </font></b> <font color = purple> It seems that the SNP annotation file you provided does not correspond to the SNP id in your genotype file</font>"
+  #                   }
+  #                 } else {
+  #                   p3_obj$snpAnno_check2 = "<font color = red><b>Success ==> </font><b><font color = purple>File check pass!</font>"
+  #                 }
+  #               } else {
+  #                 p3_obj$snpAnno_check1 = "<font color = red><b>ERROR ==> </b></font><font color = purple>Make sure that the input SNP annotation file contains the Gene ID column, and the colname of this column must be</font> <font color = red><b>「Gene」</b></font>"
+  #               }
+  #             } else if ( i == 3) {
+  #               if(is.null(p3_obj$snpAnno)) {return()
+  #               } else {
+  #                 if(p3_obj$anno_format == "customized") {
+  #                   p3_obj$snpAnno_extract =  p3_obj$snpAnno %>%
+  #                     filter(colnames(.)[2] == str_extract(p3_obj$regions,"^\\w++(?=\\:)")) %>%
+  #                     filter(colnames(.)[3] >= str_extract(p3_obj$regions,"(?<=\\:).*(?=\\-)")) %>%
+  #                     filter(colnames(.)[3] <= str_extract(p3_obj$regions,"(?<=\\-).*$")) %>%
+  #                     left_join()
+  #                 } else {
+  #                   p3_obj$snpAnno_extract =  p3_obj$snpAnno %>%
+  #                     mutate(chr = str_extract(Location,"^\\w++(?=\\:)"),
+  #                            pos = str_extract(Location,"(?<=\\:).*$")) %>%
+  #                     relocate(chr,.after = Location) %>%
+  #                     relocate(pos,.after = chr) %>%
+  #                     filter(chr == str_extract(p3_obj$regions,"^\\w++(?=\\:)")) %>%
+  #                     filter(pos >= str_extract(p3_obj$regions,"(?<=\\:).*(?=\\-)")) %>%
+  #                     filter(pos <= str_extract(p3_obj$regions,"(?<=\\-).*$"))
+  #                 }
+  #               }
+  #             } else if ( i == 4 ){
+  #               if (is.null(snp_obj$snpAnno)) {return()} else
+  #                 {
+  #                 p3_obj$expmat_extract =
+  #                   p3_obj$expmat %>%
+  #                   rename("Gene" = colnames(.)[1]) %>%
+  #                   inner_join(data.frame(Gene = p3_obj$snpAnno %>% pull(Gene)))
+  #                 }
+  #             }
+  #           }
+  #         }
+  #       )
+  #       isolate(HTML(
+  #         paste0("<font color = orange><b>Expression matrix check: </b></font>",p3_obj$heat_check,'<br/>
+  #                <font color = orange><b>SNP annotation check: </font></b>',p3_obj$snpAnno_check1,'<br/>
+  #                <font color = orange><b>SNP annotation check: </font></b>',p3_obj$snpAnno_check2)
+  #       ))
+  #     })
+  #   }
+  # )
   observeEvent(
     input$status_check,
     {
       if(is.null(expmatFile())) {return()}
-      if(is.null(snpAnnoFile())) {return()} else {p3_obj$snpAnno = snpAnnoFile()}
-      p3_obj$expmat = expmatFile()
-      p3_obj$regions = input$regions
-      p3_obj$snpAnno_extract = list()
-      p3_obj$snpAnno_check1 = list()
-      p3_obj$snpAnno_check2 = list()
-      p3_obj$expmat_extract = list()
-      p3_obj$heat_check = list()
-      p3_obj$sample_list = list()
-      p3_obj$anno_format = as.character(input$anno_format)
-      output$ExpmatCheck = renderUI({
-        progress_status = c(
-          "Step1. Summary of Heatmap database.",
-          "Step2. Summary of SNP annotation file",
-          "Step3. Extract target region from SNP annotation",
-          "Step4. Extract genes expression data by target region"
-        )
-        withProgress(
-          message = "Check Status",value = 0,
-          expr = {
-            for (i in 1:4) {
-              incProgress(1/4,progress_status[i])
-              if(i == 1) {
-                p3_obj$heat_check = paste0("<font color = red><b>Success ==> </font></b><font color = purple>Gene number ==> </font> <font color = red> <b>",nrow(p3_obj$expmat),"</font></b>. <font color = purple>Sample number: </font> <font color = red> <b>",ncol(p3_obj$expmat),"</font></b>.")
-              } else if (i == 2) {
-                if(is.null(p3_obj$snpAnno)) {return()}
-                else if ("Gene" %in% colnames(p3_obj$snpAnno)) {
-                  p3_obj$snpAnno_check1 = paste0("<font color = red> <b>Success ==> </font></b> <font color = purple>Gene ID detected in SNP annotation file. The annotated gene number: </font> <font color = red> <b>",length(p3_obj$snpAnno %>% pull(Gene) %>% unique()),"</font></b>")
-                  if (!is.null(snp_obj$SNPs)) {
-                    if (!snp_obj$SNPs[1] %in% p3_obj$snpAnno) {
-                      p3_obj$snpAnno_check2 = "<font color = blue><b>Wanning ==> </font></b> <font color = purple> It seems that the SNP annotation file you provided does not correspond to the SNP id in your genotype file</font>"
-                    }
-                  } else {
-                    p3_obj$snpAnno_check2 = "<font color = red><b>Success ==> </font><b><font color = purple>File check pass!</font>"
-                  }
-                } else {
-                  p3_obj$snpAnno_check1 = "<font color = red><b>ERROR ==> </b></font><font color = purple>Make sure that the input SNP annotation file contains the Gene ID column, and the colname of this column must be</font> <font color = red><b>「Gene」</b></font>"
-                }
-              } else if ( i == 3) {
-                if(is.null(p3_obj$snpAnno)) {return()
-                } else {
-                  if(p3_obj$anno_format == "customized") {
-                    p3_obj$snpAnno_extract =  p3_obj$snpAnno %>%
-                      filter(colnames(.)[2] == str_extract(p3_obj$regions,"^\\w++(?=\\:)")) %>%
-                      filter(colnames(.)[3] >= str_extract(p3_obj$regions,"(?<=\\:).*(?=\\-)")) %>%
-                      filter(colnames(.)[3] <= str_extract(p3_obj$regions,"(?<=\\-).*$"))
-                  } else {
-                    p3_obj$snpAnno_extract =  p3_obj$snpAnno %>%
-                      mutate(chr = str_extract(Location,"^\\w++(?=\\:)"),
-                             pos = str_extract(Location,"(?<=\\:).*$")) %>%
-                      relocate(chr,.after = Location) %>%
-                      relocate(pos,.after = chr) %>%
-                      filter(chr == str_extract(p3_obj$regions,"^\\w++(?=\\:)")) %>%
-                      filter(pos >= str_extract(p3_obj$regions,"(?<=\\:).*(?=\\-)")) %>%
-                      filter(pos <= str_extract(p3_obj$regions,"(?<=\\-).*$"))
-                  }
-                }
-              } else if ( i == 4 ){
-                if (is.null(snp_obj$snpAnno)) {return()} else
-                  {
-                  p3_obj$expmat_extract =
-                    p3_obj$expmat %>%
-                    rename("Gene" = colnames(.)[1]) %>%
-                    inner_join(data.frame(Gene = p3_obj$snpAnno %>% pull(Gene)))
-                  }
-              }
-            }
-          }
-        )
-        isolate(HTML(
-          paste0("<font color = orange><b>Expression matrix check: </b></font>",p3_obj$heat_check,'<br/>
-                 <font color = orange><b>SNP annotation check: </font></b>',p3_obj$snpAnno_check1,'<br/>
-                 <font color = orange><b>SNP annotation check: </font></b>',p3_obj$snpAnno_check2)
-        ))
-      })
     }
-  )
-
+    )
+  ##> 4.3 check snp annotation --------
   output$expmat_tbl = DT::renderDataTable(
     DT::datatable(
       {
         input$status_check
         if(is.null(p3_obj$expmat)) {return()}
-        if (is.null(snp_obj$snpAnno)) {
-          p3_obj$expmat
-        } else {
+        if(is.null(p3_obj$expmat_extract)) {return()}
           p3_obj$expmat_extract
-        }
       },
       extensions = 'Buttons',
       options = list(
@@ -1580,6 +1753,215 @@ server <- function(input,output,session) {
       )
     )
   )
+  ##> 4.3 expression heatmap --------
+  observeEvent(
+    input$ht_para2,
+    {
+      if(is.null(p3_obj$expmat_extract) | is.null(p3_obj$expmat)) {return()}
+      p3_obj$col_min <- input$col_min
+      p3_obj$col_mid <- input$col_mid
+      p3_obj$col_max <- input$col_max
+      p3_obj$breaks <- input$col_break
+      p3_obj$show_colname <- input$show_colname %>% as.logical()
+      p3_obj$show_rownames <- input$show_rownames %>% as.logical()
+      p3_obj$cluster_col <- input$cluster_col %>% as.logical()
+      p3_obj$cluster_row <- input$cluster_row %>% as.logical()
+    }
+  )
+  output$expmat_ht = renderPlot({
+    input$ht_para2
+    if(is.null(p3_obj$expmat)) {return()}
+    if(is.null(p3_obj$expmat_extract)) {return()}
+    Heatmap(
+      matrix = p3_obj$expmat_extract,
+      col = circlize::colorRamp2(
+        breaks = p3_obj$breaks,
+        colors = c(p3_obj$col_min,p3_obj$col_mid,p3_obj$col_max)
+      ),
+      show_row_names = p3_obj$show_rownames,
+      show_column_names = p3_obj$show_colname,
+      cluster_rows = p3_obj$cluster_row,
+      cluster_columns = p3_obj$cluster_co,
+      border_gp = gpar(size = 1),
+      row_title = "Expression profile of candidate genes"
+    )
+  })
+
+# Part 05. enrichment analysis -----------------------------------------------------
+  ##> 5.1 pass parametes.-----
+  p4_obj <- reactiveValues(data=NULL)
+  observeEvent(
+    input$ht_para3,
+    {
+      if(is.null(GeneAnnoFile())) {return()} else {p4_obj$GeneAnno <- GeneAnnoFile() %>% as.data.frame() %>% rename("Gene" = colnames(.)[1])}
+      if(is.null(t2g.go())) {return()} else {p4_obj$t2g.go = t2g.go() %>% as.data.frame() %>% setNames("TERM","GENE")}
+      if(is.null(t2n.go())) {return()} else
+      {
+        p4_obj$t2n.go = t2n.go() %>% as.data.frame() %>%
+          setNames(c("TERM","NAME","ONT")) %>%
+          mutate(ONT = case_when(
+            str_detect(ONT,pattern = "(?i)molecular|MF") ~ "MF",
+            str_detect(ONT,pattern = "(?i)cellular|CC") ~ "CC",
+            str_detect(ONT,pattern = "(?i)biologcal|BP") ~ "BP"
+          ))
+      }
+      if(is.null(t2g.kegg())) {return()} else {p4_obj$t2g.kegg = t2g.kegg() %>% as.data.frame() %>% setNames("TERM","GENE")}
+      if(is.null(t2n.kegg())) {return()} else {p4_obj$t2n.kegg = t2n.kegg() %>% as.data.frame() %>% setNames("TERM","NAME")}
+      p4_obj$GeneList = data.frame(
+        Gene = input$GeneList %>% str_split(.,"\n") %>% unlist() %>% unique()
+      )
+      p4_obj$enrich_min = as.character(input$enrich_min)
+      p4_obj$enrich_max = as.character(input$enrich_max)
+      p4_obj$pval_cutoff = as.character(input$pval_cutoff)
+      p4_obj$qval_cutoff = as.character(input$qval_cutoff)
+      p4_obj$ONT = as.character(input$ONT)
+      p4_obj$enrich_plt_type = as.character(input$enrich_plt_type)
+      p4_obj$showCategory = as.numeric(input$showCategory)
+      p4_obj$t2n.go_final = p4_obj$t2n.go %>% filter(ONT == p4_obj$ONT)
+      p4_obj$enrich_go_tbl = enricher(
+        gene = input$GeneList %>% str_split(.,"\n") %>% unlist() %>% unique(),
+        pvalueCutoff = p4_obj$pval_cutoff,qvalueCutoff = p4_obj$qval_cutoff,
+        TERM2GENE = p4_obj$t2g.go,TERM2NAME = p4_obj$t2n.go_final
+      )
+      if(p4_obj$enrich_plt_type == "dotplot") {p4_obj$enrich_go_plt = dotplot(p4_obj$enrich_go_tbl,showCategory = p4_obj$showCategory)}
+      if(p4_obj$enrich_plt_type == "barplot") {p4_obj$enrich_go_plt = barplot(p4_obj$enrich_go_tbl,showCategory = p4_obj$showCategory)}
+      p4_obj$enrich_kegg_tbl = enricher(
+        gene = input$GeneList %>% str_split(.,"\n") %>% unlist() %>% unique(),
+        pvalueCutoff = p4_obj$pval_cutoff,qvalueCutoff = p4_obj$qval_cutoff,
+        TERM2GENE = p4_obj$t2g.kegg,TERM2NAME = p4_obj$t2n.kegg
+      )
+      if(p4_obj$enrich_plt_type == "dotplot") {p4_obj$enrich_kegg_plt = dotplot(p4_obj$enrich_kegg_tbl,showCategory = p4_obj$showCategory)}
+      if(p4_obj$enrich_plt_type == "barplot") {p4_obj$enrich_kegg_plt = barplot(p4_obj$enrich_kegg_tbl,showCategory = p4_obj$showCategory)}
+    }
+  )
+
+  ##> 5.2 Output table -----
+  ##> annotation
+  output$Annotation_tbl = DT::renderDataTable(
+    DT::datatable(
+      {
+        input$ht_para3
+        if(is.null(GeneAnnoFile())) {return()}
+        p4_obj$GeneAnno %>%
+          inner_join(p4_obj$GeneList) %>%
+          distinct()
+      },
+      extensions = 'Buttons',
+      options = list(
+        autoWidth = T,
+        dom = 'Bfrtip',
+        scrollX = T,
+        lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
+        pageLength = 15,
+        scrollY = "400px",
+        buttons = list(
+          list(
+            extend = "collection",
+            text = 'Show All',
+            action = DT::JS("function ( e, dt, node, config ) {
+                                    dt.page.len(-1);
+                                    dt.ajax.reload();
+                                }")),
+          list(
+            extend = "collection",
+            text = 'Show Less',
+            action = DT::JS("function ( e, dt, node, config ) {
+                              dt.page.len(15);
+                              dt.ajax.reload();}")
+          )
+        )
+      )
+    )
+  )
+  ##> enrichmet tbl
+  output$Enrichment_tbl_go = DT::renderDataTable(
+    DT::datatable(
+      {
+        input$ht_para3
+        if(is.null(t2g.go())) {return()}
+        if(is.null(t2n.go())) {return()}
+        p4_obj$enrich_go_tbl
+      },
+      extensions = 'Buttons',
+      options = list(
+        autoWidth = T,
+        dom = 'Bfrtip',
+        scrollX = T,
+        lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
+        pageLength = 15,
+        scrollY = "400px",
+        buttons = list(
+          list(
+            extend = "collection",
+            text = 'Show All',
+            action = DT::JS("function ( e, dt, node, config ) {
+                                    dt.page.len(-1);
+                                    dt.ajax.reload();
+                                }")),
+          list(
+            extend = "collection",
+            text = 'Show Less',
+            action = DT::JS("function ( e, dt, node, config ) {
+                              dt.page.len(15);
+                              dt.ajax.reload();}")
+          )
+        )
+      )
+    )
+  )
+  ##> go plot
+  output$Enrichment_plot_go = renderPlot({
+    input$ht_para3
+    if(is.null(t2g.go())) {return()}
+    if(is.null(t2n.go())) {return()}
+    if(is.null(p4_obj$enrich_go_tbl)) {return()}
+    p4_obj$enrich_go_plt
+  })
+  ##> enrichment kegg
+  output$Enrichment_tbl_kegg = DT::renderDataTable(
+    DT::datatable(
+      {
+        input$ht_para3
+        if(is.null(t2g.kegg())) {return()}
+        if(is.null(t2n.kegg())) {return()}
+        p4_obj$enrich_kegg_tbl
+      },
+      extensions = 'Buttons',
+      options = list(
+        autoWidth = T,
+        dom = 'Bfrtip',
+        scrollX = T,
+        lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
+        pageLength = 15,
+        scrollY = "400px",
+        buttons = list(
+          list(
+            extend = "collection",
+            text = 'Show All',
+            action = DT::JS("function ( e, dt, node, config ) {
+                                    dt.page.len(-1);
+                                    dt.ajax.reload();
+                                }")),
+          list(
+            extend = "collection",
+            text = 'Show Less',
+            action = DT::JS("function ( e, dt, node, config ) {
+                              dt.page.len(15);
+                              dt.ajax.reload();}")
+          )
+        )
+      )
+    )
+  )
+  ##> KEGG plot
+  output$Enrichment_plot_go = renderPlot({
+    input$ht_para3
+    if(is.null(t2g.kegg())) {return()}
+    if(is.null(t2n.kegg())) {return()}
+    if(is.null(p4_obj$enrich_kegg_tbl)) {return()}
+    p4_obj$enrich_kegg_plt
+  })
+
 
 }
 
