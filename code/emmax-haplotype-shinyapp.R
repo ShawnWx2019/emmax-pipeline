@@ -6,6 +6,7 @@
 #                  Version: V0.0.1
 #################################################################
 suppressMessages(if (!require('tidyverse')) install.packages('tidyverse'))
+suppressMessages(if (!require('stringr')) install.packages('stringr'))
 suppressMessages(if (!require('devtools')) install.packages('devtools'))
 suppressMessages(if (!require("treeio")) devtools::install_github("YuLab-SMU/treeio"))
 suppressMessages(if (!require("ggtree")) devtools::install_github("YuLab-SMU/ggtree"))
@@ -280,6 +281,7 @@ get_da_result <- function(input_tbl,DA_method,fig_type,sig_tag) {
     group_by(haplotype) %>%
     summarise(n=n()) %>%
     mutate(tag = paste0(haplotype,"\n(n=",n,")")) %>%
+    filter(n > 1) %>%
     ungroup()
   ##> 2.2 re-union data (haplotype with number)
   if("group" %in% colnames(input_tbl)) {
@@ -788,6 +790,7 @@ ui <- shinyUI(
                 title = "Check your input",height = "500px",width ="100%",
                 icon = icon("box"),
                 tags$h3("Status",style = 'color: #008080'),
+                actionButton(inputId = "run_extract",label = "Extract information"),
                 hr_main,
                 htmlOutput("ExpmatCheck"),
                 tags$h3("Expression matrix",style = 'color: #008080'),
@@ -889,7 +892,7 @@ ui <- shinyUI(
                 tags$h3("Import Gene list",style = 'color: #008080'),
                 hr_main,
                 HTML(
-                "<span style='color: blue; font-size: 13px; font-style: italic;'>
+                  "<span style='color: blue; font-size: 13px; font-style: italic;'>
                 One gene ID per line, you can directly copy a column of Gene IDs from Excel and paste it into the input box below
                 <br/></span>
                 "
@@ -1032,7 +1035,7 @@ server <- function(input,output,session) {
   })
 
   # Part 01 data import and haplotype partitioning ------------------------------------------------
-    #> 1.1 data input -----
+  #> 1.1 data input -----
   genofile <- reactive({
     file1 <- input$genopath
     if(is.null(file1)){return()}
@@ -1061,7 +1064,7 @@ server <- function(input,output,session) {
     if(is.null(file4)){return()}
     read.delim(file = file4$datapath,header = T)
   })
-    #> 1.2 pass input parameters to shiny app -----
+  #> 1.2 pass input parameters to shiny app -----
   ht_obj <- reactiveValues(data=NULL)
   downloads <- reactiveValues(data = NULL)
   #> Set parameter
@@ -1301,7 +1304,7 @@ server <- function(input,output,session) {
   )
 
 
- # Part 02 Calculate the significance of phenotypic differences among haplotypes. --------
+  # Part 02 Calculate the significance of phenotypic differences among haplotypes. --------
   ##> 2.1 import sample group file and update "trait" and "snp" input selection-----
   DA_obj <- reactiveValues(data=NULL)
   groupFile <- reactive({
@@ -1454,7 +1457,7 @@ server <- function(input,output,session) {
   })
 
 
-# Part 03. Download result 01 ---------------------------------------------
+  # Part 03. Download result 01 ---------------------------------------------
   download <- reactiveValues(data=NULL)
   #> 3.1 set figure size -----
   observeEvent(
@@ -1547,7 +1550,7 @@ server <- function(input,output,session) {
   )
 
 
-# Part 04 Check expression profile and snp annotation of candidate regions --------
+  # Part 04 Check expression profile and snp annotation of candidate regions --------
   ##> 4.1 import file ------
   expmatFile <- reactive({
     file6<- input$ExpMat
@@ -1562,29 +1565,29 @@ server <- function(input,output,session) {
   GeneAnnoFile <- reactive({
     file8 <- input$GeneAnno
     if(is.null(file8)){return()}
-    readxl::read_xlsx(file = file8$datapath)
+    readxl::read_xlsx(path = file8$datapath)
   })
   tryCatch(
     {
       t2g.go <- reactive({
         file9 <- input$EnrichDB
         if(is.null(file9)){return()}
-        readxl::read_xlsx(file = file9$datapath,sheet = 1)
+        readxl::read_xlsx(path = file9$datapath,sheet = 1)
       })
       t2n.go <- reactive({
         file9 <- input$EnrichDB
         if(is.null(file9)){return()}
-        readxl::read_xlsx(file = file9$datapath,sheet = 2)
+        readxl::read_xlsx(path = file9$datapath,sheet = 2)
       })
       t2g.kegg <- reactive({
         file9 <- input$EnrichDB
         if(is.null(file9)){return()}
-        readxl::read_xlsx(file = file9$datapath,sheet = 3)
+        readxl::read_xlsx(path = file9$datapath,sheet = 3)
       })
       t2n.kegg <- reactive({
         file9 <- input$EnrichDB
         if(is.null(file9)){return()}
-        readxl::read_xlsx(file = file9$datapath,sheet = 4)
+        readxl::read_xlsx(path = file9$datapath,sheet = 4)
       })
     },error = function(e) {
       message("no enrichmnet database!")
@@ -1600,10 +1603,13 @@ server <- function(input,output,session) {
     {
       if(is.null(expmatFile())) {return()}
       if(is.null(snpAnnoFile())) {return()}
+      if(is.null(GeneAnnoFile)) {return()}
       p3_obj$snpAnno = list()
       p3_obj$expmat = list()
       p3_obj$heat_check = list()
       p3_obj$snpAnno_check = list()
+      p3_obj$GeneAnno_check = list()
+      p3_obj$GeneAnnoFile = list()
       progress_check = c(
         "Step1. Import data",
         'Step2. Data format check',
@@ -1619,9 +1625,12 @@ server <- function(input,output,session) {
               p3_obj$snpAnno = snpAnnoFile();
               if(is.null(expmatFile())) {return()};
               p3_obj$expmat = expmatFile();
+              if(is.null(GeneAnnoFile())) {return()};
+              p3_obj$GeneAnnoFile = GeneAnnoFile();
             } else if(i == 2) {
-              p3_obj$heat_check = paste0("<font color = red><b>Success ==> </font></b><font color = purple>Gene number ==> </font> <font color = red> <b>",nrow(p3_obj$expmat),"</font></b>. <font color = purple>Sample number: </font> <font color = red> <b>",ncol(p3_obj$expmat),"</font></b>.")
-              if('Gene' %in% colnames(p3$snpAnno)) {
+              p3_obj$heat_check = paste0("<font color = red><b>Expression file check: Success ==> </font></b><font color = purple>Gene number ==> </font> <font color = red> <b>",nrow(p3_obj$expmat),"</font></b>. <font color = purple>Sample number: </font> <font color = red> <b>",ncol(p3_obj$expmat),"</font></b>.")
+              p3_obj$GeneAnno_check = paste0("<font color = red><b>Genen annotation file check: Success ==> </font></b><font color = purple>Gene number ==> </font> <font color = red> <b>",nrow(p3_obj$GeneAnnoFile),"</font></b>.")
+              if('Gene' %in% colnames(p3_obj$snpAnno)) {
                 p3_obj$snpAnno_check = paste0("<font color = red> <b>Success ==> </font></b> <font color = purple>Gene ID detected in SNP annotation file. The annotated gene number: </font> <font color = red> <b>",length(p3_obj$snpAnno %>% pull(Gene) %>% unique()),"</font></b>")
               } else {
                 p3_obj$snpAnno_check = "<font color = red><b>ERROR ==> </b></font><font color = purple>Make sure that the input SNP annotation file contains the Gene ID column, and the colname of this column must be</font> <font color = red><b>「Gene」</b></font>"
@@ -1630,7 +1639,8 @@ server <- function(input,output,session) {
               output$ExpmatCheck = renderUI({
                 isolate(HTML(
                   paste0("<font color = orange><b>Expression matrix check: </b></font>",p3_obj$heat_check,'<br/>
-                          <font color = orange><b>SNP annotation check: </font></b>',p3_obj$snpAnno_check)
+                          <font color = orange><b>SNP annotation check: </font></b>',p3_obj$snpAnno_check,'<br/>
+                          <font color = orange><b>Gene annotation file check: </font></b>',p3_obj$GeneAnno_check)
                 ))
               })
             }
@@ -1638,18 +1648,20 @@ server <- function(input,output,session) {
         }
       )
     }
-    )
+  )
   observeEvent(
-    input$run_filter,
+    input$run_extract,
     {
       if(is.null(p3_obj$snpAnno)) {return()}
       if(is.null(p3_obj$expmat)) {return()}
+      if(is.null(GeneAnnoFile)) {return()}
       p3_obj$regions = input$regions
-      p3_obj$chr = str_spilt(p3_obj$regions,":",2,T)[,1]
-      p3_obj$start = str_spilt(p3_obj$regions,":|-",3,T)[,2]
-      p3_obj$end = str_spilt(p3_obj$regions,":|-",3,T)[,3]
+      p3_obj$chr = as.character(str_split(p3_obj$regions,":",2,T)[,1])
+      p3_obj$start = as.numeric(str_split(p3_obj$regions,":|-",3,T)[,2])
+      p3_obj$end = as.numeric(str_split(p3_obj$regions,":|-",3,T)[,3])
       p3_obj$anno_format = as.character(input$anno_format)
       p3_obj$expmat_extract = list()
+      p3_obj$snpAnno_extract = list()
       p3_obj$sample_list = list()
       progress_anno =c(
         "Step1. SNP filter by regions",
@@ -1661,10 +1673,34 @@ server <- function(input,output,session) {
           for (i in 1:2) {
             incProgress(1/2,progress_anno[i])
             if (i == 1) {
-              p3_obj$snpAnno_extract = psobj$snpAnno %>%
-                filter(colnames(.)[2] == p3_obj$chr) %>%
-                filter(colnames(.)[3] >= p3_obj$start) %>%
-                filter(colnames(.)[3] <= p3_obj$end)
+              if(p3_obj$anno_format == "customized") {
+                p3_obj$snpAnno_extract = p3_obj$snpAnno %>%
+                  rename(chr = colnames(.)[2]) %>%
+                  rename(pos = colnames(.)[3]) %>%
+                  mutate(pos = as.numeric(pos)) %>%
+                  filter(chr == p3_obj$chr) %>%
+                  filter(pos >= p3_obj$start) %>%
+                  filter(pos <= p3_obj$end) %>%
+                  left_join(.,p3_obj$GeneAnnoFile %>% rename("Gene" = colnames(.)[1]),by = "Gene")
+              } else {
+                p3_obj$snpAnno_extract = p3_obj$snpAnno %>%
+                  mutate(chr = str_split(Location,":",2,T)[,1],
+                         pos = as.numeric(str_split(Location,":",2,T)[,2])) %>%
+                  relocate(chr,.after = Location) %>%
+                  relocate(pos,.after = chr) %>%
+                  filter(chr == p3_obj$chr) %>%
+                  filter(pos >= p3_obj$start) %>%
+                  filter(pos <= p3_obj$end) %>%
+                  left_join(.,p3_obj$GeneAnnoFile %>% rename("Gene" = colnames(.)[1]),by = "Gene")
+              }
+            } else {
+              p3_obj$sample_list =
+                p3_obj$snpAnno_extract %>%
+                filter("Gene" != "-") %>%
+                select(Gene) %>%
+                distinct()
+              p3_obj$expmat_extract =
+                inner_join(p3_obj$expmat,p3_obj$sample_list,by = "Gene")
             }
           }
         }
@@ -1678,7 +1714,7 @@ server <- function(input,output,session) {
         input$status_check
         if(is.null(p3_obj$expmat)) {return()}
         if(is.null(p3_obj$expmat_extract)) {return()}
-          p3_obj$expmat_extract
+        p3_obj$expmat_extract
       },
       extensions = 'Buttons',
       options = list(
@@ -1751,6 +1787,9 @@ server <- function(input,output,session) {
       p3_obj$col_mid <- input$col_mid
       p3_obj$col_max <- input$col_max
       p3_obj$breaks <- input$col_break
+      p3_obj$breaks_1 <- str_split(ps_obj$breaks,",",3,T)[,1] %>% as.numeric()
+      p3_obj$breaks_2 <- str_split(ps_obj$breaks,",",3,T)[,2] %>% as.numeric()
+      p3_obj$breaks_3 <- str_split(ps_obj$breaks,",",3,T)[,3] %>% as.numeric()
       p3_obj$show_colname <- input$show_colname %>% as.logical()
       p3_obj$show_rownames <- input$show_rownames %>% as.logical()
       p3_obj$cluster_col <- input$cluster_col %>% as.logical()
@@ -1764,19 +1803,19 @@ server <- function(input,output,session) {
     Heatmap(
       matrix = p3_obj$expmat_extract,
       col = circlize::colorRamp2(
-        breaks = p3_obj$breaks,
+        breaks = c(p3_obj$breaks_1,ps_obj$breaks_2,ps_obj$breaks_3),
         colors = c(p3_obj$col_min,p3_obj$col_mid,p3_obj$col_max)
       ),
       show_row_names = p3_obj$show_rownames,
       show_column_names = p3_obj$show_colname,
       cluster_rows = p3_obj$cluster_row,
-      cluster_columns = p3_obj$cluster_co,
+      cluster_columns = p3_obj$cluster_col,
       border_gp = gpar(size = 1),
       row_title = "Expression profile of candidate genes"
     )
   })
 
-# Part 05. enrichment analysis -----------------------------------------------------
+  # Part 05. enrichment analysis -----------------------------------------------------
   ##> 5.1 pass parametes.-----
   p4_obj <- reactiveValues(data=NULL)
   observeEvent(
@@ -1794,8 +1833,8 @@ server <- function(input,output,session) {
             str_detect(ONT,pattern = "(?i)biologcal|BP") ~ "BP"
           ))
       }
-      if(is.null(t2g.kegg())) {return()} else {p4_obj$t2g.kegg = t2g.kegg() %>% as.data.frame() %>% setNames("TERM","GENE")}
-      if(is.null(t2n.kegg())) {return()} else {p4_obj$t2n.kegg = t2n.kegg() %>% as.data.frame() %>% setNames("TERM","NAME")}
+      if(is.null(t2g.kegg())) {return()} else {p4_obj$t2g.kegg = t2g.kegg() %>% as.data.frame() %>% setNames(c("TERM","GENE"))}
+      if(is.null(t2n.kegg())) {return()} else {p4_obj$t2n.kegg = t2n.kegg() %>% as.data.frame() %>% setNames(c("TERM","NAME"))}
       p4_obj$GeneList = data.frame(
         Gene = input$GeneList %>% str_split(.,"\n") %>% unlist() %>% unique()
       )
