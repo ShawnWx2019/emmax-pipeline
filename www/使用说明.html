@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Shawn Wang">
+<meta name="dcterms.date" content="2023-06-04">
+
+<title>emmax-pipeline 流程搭建与使用</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="使用说明_files/libs/clipboard/clipboard.min.js"></script>
+<script src="使用说明_files/libs/quarto-html/quarto.js"></script>
+<script src="使用说明_files/libs/quarto-html/popper.min.js"></script>
+<script src="使用说明_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="使用说明_files/libs/quarto-html/anchor.min.js"></script>
+<link href="使用说明_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="使用说明_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="使用说明_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="使用说明_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="使用说明_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">emmax-pipeline 流程搭建与使用</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Shawn Wang </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 4, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<center>
+<p><font color="salmon" size="2pt"> 🏡Zhang Lab, Jun 04, 2023 🏡</font></p>
+<p><font color="green" size="2pt"> 🔬Multi-omics research center🔬</font></p>
+<p><font color="green" size="2pt"> 🔬State Key Laboratory of Crop Stress Adaption and Improvement, HENU, Kaifeng, Henan 🔬</font></p>
+</center>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Emmax-pipeline.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Overview</figcaption>
+</figure>
+</div>
+<section id="环境配置和软件安装" class="level1">
+<h1>环境配置和软件安装</h1>
+<p>本流程需要在linux/Unix(MacOS)或者windows WSL环境下配置。建议通过<code>conda</code>完成环境搭建及软件安装。下面将讲解详细步骤。</p>
+<section id="conda下搭建emmax-gwas分析环境" class="level2">
+<h2 class="anchored" data-anchor-id="conda下搭建emmax-gwas分析环境">conda下搭建emmax-gwas分析环境</h2>
+<section id="安装conda" class="level3">
+<h3 class="anchored" data-anchor-id="安装conda">安装conda</h3>
+<p>首先到清华镜像站下载miniconda安装包：<a href="https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/?C=M&amp;O=D">index of /annconda/miniconda</a>，根据自己操作系统类型选择<strong>最新日期</strong>对应的安装包。</p>
+<p>1.1 通过wget将Miniconda安装包下载到服务器； 1.2 添加执行权限，运行安装脚本，结束的时候注意不要选择随系统启动，以防conda污染环境变量 1.3 创建一个alias快捷启动conda 1.4 替换软件镜像</p>
+<p>代码如下：</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 下载到电脑</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-py39_23.3.1-0-Linux-x86_64.sh</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; --2023-06-14 09:14:37--  https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-py39_23.3.1-0-Linux-x86_64.sh</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Resolving mirrors.tuna.tsinghua.edu.cn (mirrors.tuna.tsinghua.edu.cn)... 101.6.15.130</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Connecting to mirrors.tuna.tsinghua.edu.cn (mirrors.tuna.tsinghua.edu.cn)|101.6.15.130|:443... connected.</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; HTTP request sent, awaiting response... 200 OK</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Length: 63969016 (61M) [application/octet-stream]</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Saving to: ‘Miniconda3-py39_23.3.1-0-Linux-x86_64.sh’</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Miniconda3-py39_23.3.1-0-Linux-aa 100%[==========================================================&gt;]  61.00M  53.7MB/s    in 1.1s 2023-06-14 09:14:38 (53.7 MB/s) - ‘</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Miniconda3-py39_23.3.1-0-Linux-x86_64.sh’ saved [63969016/63969016]</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 添加可执行权限</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> +x Miniconda3-py39_23.3.1-0-Linux-x86_64.sh</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 执行安装脚本</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> Miniconda3-py39_23.3.1-0-Linux-x86_64.sh</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 下面一路yes+回车就可以了 就是在最后看到是否开机启动的时候选择no</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Do you wish the installer to initialize Miniconda3</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; by running conda init? [yes|no]</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [no] &gt;&gt;&gt; no</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 新建一个放置alias的配置文件</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">touch</span> ~/.bash_alias</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 将快捷启动conda的conact写入刚创建的~/.bash_alias</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">'alias conact="source ~/miniconda3/bin/activate"'</span> <span class="op">&gt;&gt;</span> ~/.bash_alias</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 将source ~/.bash_alias写到用户配置文件下，每次启动shell bash_alias中的快捷命令自动生效</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">'source ~/.bash_alias'</span> <span class="op">&gt;&gt;</span> ~/.bashrc<span class="dt">\</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>#<span class="op">&gt;</span> 重新加载下配置文件</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bash_alias</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 利用conact启动conda</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="ex">conact</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 更换镜像源</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="ex">vim</span> ~/.condarc</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 全程英文输入模式！！！</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 键盘输入i进入编辑模式，左下角能看到状态变为insert</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 将下列代码粘贴进去</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="ex">channels:</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-</span> defaults</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="ex">show_channel_urls:</span> true</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="ex">default_channels:</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-</span> https://mirrors.bfsu.edu.cn/anaconda/pkgs/main</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-</span> https://mirrors.bfsu.edu.cn/anaconda/pkgs/r</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-</span> https://mirrors.bfsu.edu.cn/anaconda/pkgs/msys2</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="ex">custom_channels:</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  <span class="ex">conda-forge:</span> https://mirrors.bfsu.edu.cn/anaconda/cloud</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  <span class="ex">msys2:</span> https://mirrors.bfsu.edu.cn/anaconda/cloud</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="ex">bioconda:</span> https://mirrors.bfsu.edu.cn/anaconda/cloud</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  <span class="ex">menpo:</span> https://mirrors.bfsu.edu.cn/anaconda/cloud</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  <span class="ex">pytorch:</span> https://mirrors.bfsu.edu.cn/anaconda/cloud</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>  <span class="ex">pytorch-lts:</span> https://mirrors.bfsu.edu.cn/anaconda/cloud</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  <span class="ex">simpleitk:</span> https://mirrors.bfsu.edu.cn/anaconda/cloud</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 按ESC退出编辑模式,然后按：号进入命令执行模式，做下角光标闪烁，输入wq回车</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> clean <span class="at">-i</span> <span class="co">#清理index cache</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="新建一个emmax分析环境" class="level3">
+<h3 class="anchored" data-anchor-id="新建一个emmax分析环境">新建一个emmax分析环境</h3>
+<p>做分析需要下面的软件：</p>
+<table class="table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>软件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>bcftools</td>
+<td>操作vcf文件，包括修改染色体prefix，按区间提取，构建索引，过滤snp等</td>
+</tr>
+<tr class="even">
+<td>vcftools</td>
+<td>和bcftools类似</td>
+</tr>
+<tr class="odd">
+<td>plink</td>
+<td>将vcf转换为plink格式，然后进行vcf文件操作，emmax要求输入文件格式为plink</td>
+</tr>
+<tr class="even">
+<td>tassel</td>
+<td>基因型文件转换格式，pca，生成phylo文件</td>
+</tr>
+<tr class="odd">
+<td>fasttree</td>
+<td>目标区间快速建立NJ树</td>
+</tr>
+<tr class="even">
+<td>admixture</td>
+<td>群体结构分析</td>
+</tr>
+<tr class="odd">
+<td>beagle</td>
+<td>缺失基因型填补</td>
+</tr>
+<tr class="even">
+<td>tabix</td>
+<td>vcf建立索引</td>
+</tr>
+<tr class="odd">
+<td>gatk</td>
+<td>snp calling</td>
+</tr>
+<tr class="even">
+<td>samtools</td>
+<td>操作sam，bam文件 对可以结构变异切割bam文件通过IGV验证</td>
+</tr>
+<tr class="odd">
+<td>vep</td>
+<td>SNP文件注释</td>
+</tr>
+</tbody>
+</table>
+<p>代码如下：</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">-c</span> bioconda <span class="at">-n</span> gwas bcftools vcftools plink tassel admixture beagle fasttree tabix samtools gatk <span class="at">-y</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 安装成功后可以看到以下提醒</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># To activate this environment, use</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#     $ conda activate gwas</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># To deactivate an active environment, use</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#     $ conda deactivate</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 单独给vep创建一个环境</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">-c</span> bioconda <span class="at">-n</span> ensembl-vep vep <span class="at">-y</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="安装emmax" class="level3">
+<h3 class="anchored" data-anchor-id="安装emmax">安装emmax</h3>
+<p>emmax有可以直接在unbuntu20.04编译好的软件 直接下载，解压使用，不过为了方便，我们还是需要些两个alias方便使用emmax和emmax-kin，或者直接把他们加入环境变量。</p>
+<p>代码：</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> http://csg.sph.umich.edu//kang/emmax/download/emmax-beta-07Mar2010.tar.gz</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># --2023-06-14 11:05:10--  http://csg.sph.umich.edu//kang/emmax/download/emmax-beta-07Mar2010.tar.gz</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Resolving csg.sph.umich.edu (csg.sph.umich.edu)... 141.211.55.24</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Connecting to csg.sph.umich.edu (csg.sph.umich.edu)|141.211.55.24|:80... connected.</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># HTTP request sent, awaiting response... 200 OK</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Length: 519928 (508K) [application/x-gzip]</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Saving to: ‘emmax-beta-07Mar2010.tar.gz’</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># emmax-beta-07Mar2010.tar.gz          100%[=====================================================================&gt;] 507.74K   416KB/s    in 1.2s</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># 2023-06-14 11:05:13 (416 KB/s) - ‘emmax-beta-07Mar2010.tar.gz’ saved [519928/519928]</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-xvf</span> emmax-beta-07Mar2010.tar.gz</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 将emmax文件夹放到家目录的software路径下</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> ~/software</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> emmax-beta-07Mar2010 ~/software/</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 创建alias</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">'alias emmax="~/software/emmax-beta-07Mar2010/emmax"'</span> <span class="op">&gt;&gt;</span> ~/.bash_alias</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">'alias emmax-kin="~/software/emmax-beta-07Mar2010/emmax-kin"'</span> <span class="op">&gt;&gt;</span> ~/.bash_alias</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bash_alias</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 测试</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="ex">emmax</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 出现下面提示说明安装完毕</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Usage: emmax [options]</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Required parameters</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co">#   -t [tpedf_prefix] : prefix for tped/tfam files</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">#   -o [out_prefix]  : output file name prefix</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Likely essential parameters</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#   -p [phenof] : 3-column phenotype file with FAMID, INDID at the first two colmns, in the same order of .tfam file. Not required only with -K option  -k [kinf] : n * n matrix containing kinship values in the individual order consistent to [tpedf].tfam file. [tpedf].kinf will be used if not specified</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">#   -c [covf] : multi-column covariate file with FAMID, INDID at the first two colmns, in the same order of .tfam fileOptional parameters</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Optional parameters</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">#   -i [in_prefix] : input file name prefix including eigenvectors</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">#   -d [# digits]  : precision of the output values (default : 5)</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co">#   -s [start index of SNP] : start index of SNP (default : 0)</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co">#   -e [end index of SNP] : end index of SNP (default : #snps)</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">#   -w : flag for writing eigenvalues/eigenvector files</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">#   -D [delimiters] : delimter string in quotation marks</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">#   -P [# heaer cols in tped] : # of column headers in tped file</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">#   -F [# heaer cols in tfam] : # of column headers in tfam file</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Segmentation fault (core dumped)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="下载脚本文件" class="level3">
+<h3 class="anchored" data-anchor-id="下载脚本文件">下载脚本文件</h3>
+<p>可以通过下载压缩包和通过git等方式将仓库代码下载到服务器，然后给脚本添加alias..</p>
+<table class="table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>步骤</th>
+<th>脚本名称</th>
+<th>alias</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>协变量文件格式化</td>
+<td>MakeEmmaxCov.R</td>
+<td>emmax-cov</td>
+<td>修改协变量文件格式</td>
+</tr>
+<tr class="even">
+<td>表型数据文件格式化</td>
+<td>split_phenotype.R</td>
+<td>emmax-pheno-split</td>
+<td>表型分割</td>
+</tr>
+<tr class="odd">
+<td>开始关联分析及下游文件生成</td>
+<td>run_emmax_pipeline.sh</td>
+<td>run_emmax_pipeline</td>
+<td>数据准备好后执行该脚本会将下游分析一键完成</td>
+</tr>
+<tr class="even">
+<td>开始关联分析及下游文件生成</td>
+<td>EMMAX_DownStream.R</td>
+<td>emmax-down</td>
+<td>已经被集成到run_emmax-pipeline</td>
+</tr>
+<tr class="odd">
+<td>区域单倍型划分</td>
+<td>emmax-haplotype.sh</td>
+<td>emmax-haplotype</td>
+<td>根据候选区间进行单倍型划分</td>
+</tr>
+<tr class="even">
+<td>区域单倍型热图</td>
+<td>emmax-haploheatmap.R</td>
+<td>emmax-haploheatmap</td>
+<td>倍集成到emmax-haplotype</td>
+</tr>
+</tbody>
+</table>
+<p>代码：</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> <span class="co"># 返回家目录</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> src <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> src <span class="co"># 创建一个src路径 然后进入该文件夹</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/ShawnWx2019/emmax-pipeline.git <span class="co"># 通过git将emmax-pipeline下载到本地</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"alias emmax-pca='Rscript ~/src/emmax-pipeline/code/PCA_var_proportion.R'"</span> <span class="op">&gt;&gt;</span> ~/.bash_alias</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"alias emmax-cov='Rscript ~/src/emmax-pipeline/code/MakeEmmaxCov.R'"</span> <span class="op">&gt;&gt;</span> ~/.bash_alias</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"alias emmax-down='Rscript ~/src/emmax-pipeline/code/EMMAX_DownStream.R'"</span> <span class="op">&gt;&gt;</span> ~/.bash_alias</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"alias emmax-pheno-split='Rscript ~/src/emmax-pipeline/code/split_phenotype.R'"</span> <span class="op">&gt;&gt;</span> ~/.bash_alias</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"alias run_emmax_pipeline='bash ~/src/emmax-pipeline/code/run_emmax_pipeline.sh'"</span> <span class="op">&gt;&gt;</span> ~/.bash_alias</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"alias emmax-haplotype='bash ~/src/emmax-pipeline/code/emmax-haplotype.sh'"</span> <span class="op">&gt;&gt;</span> ~/.bash_alias</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"alias emmax-haploheatmap='Rscript ~/src/emmax-pipeline/code/emmax-haploheatmap.R'"</span> <span class="op">&gt;&gt;</span> ~/.bash_alias</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bash_alias</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>至此，上游分析环境搭建工作完毕。</p>
+</section>
+</section>
+</section>
+<section id="emmax上游分析" class="level1">
+<h1>Emmax上游分析</h1>
+<section id="基因型文件过滤" class="level2">
+<h2 class="anchored" data-anchor-id="基因型文件过滤">基因型文件过滤</h2>
+<p>首先最原始的基因型文件应该是经过GATK call snp后进行质控后的<code>.vcf</code>文件, 可以直接使用<code>vcftools</code>进行进一步过滤，对于过滤参数的标准可以参考文献中对应物种的过滤方式。 例如在@duResequencing243Diploid2018 文章中，陆地棉的过滤条件为：</p>
+<blockquote class="blockquote">
+<p>only high-quality SNPs (coverage depth ≥3 and ≤50, mapping quality ≥20, missing ratio of samples within population ≤10% (1,980,539 SNPs) or 20% (3,665,030 SNPs), and minor allele frequency (MAF) ≥0.05) were retained for subsequent analyses. SNPs with a miss ratio ≤10% were used in PCA/phylogenetictree/structure analyses, whereas SNPs with a miss ratio ≤20% were used in the rest of the analyses.</p>
+</blockquote>
+<p><font color="green"><strong>第一步:</strong></font> 首先emmax要求染色体为纯数字，如果你发现GATK生成的vcf文件中染色体为”chr01”等并非纯数字时需要通过bcftools修改一下染色体。</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">##&gt; GATK 一般不会给snp加ID，这里用bcftools对vcf文件中snp命名，方式为chr:pos</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> annotate <span class="at">--set-id</span> <span class="st">'%CHROM:%POS'</span> raw.vcf.gz</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 手动写一个配置文件，左边为原始的</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">vim</span> chr_cn.txt</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">i</span> <span class="co">## 进入编辑模式</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="ex">chr1</span>    1</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="ex">chr2</span>    2</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="ex">chr3</span>    3</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="ex">chr4</span>    4</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="ex">chr5</span>    5</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="ex">ESC</span> <span class="co">#退出编辑模式</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="ex">wq</span> <span class="co"># 保存</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">## 使用bcftools 修改染色体名称</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> annotate <span class="at">--rename-chrs</span> chr_cn.txt raw.vcf.gz <span class="kw">|</span> <span class="ex">bgzip</span> <span class="at">-c</span> <span class="op">&gt;</span>raw_rename.vcf.gz</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">## 给新生成的vcf文件建立索引</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> index <span class="at">-t</span> raw_rename.vcf.gz</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><font color="green"><strong>第二步:</strong></font> 用plink对vcf文件过滤，生成的<code>Gh_383.maf0.05.int0.8.vcf</code></p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">plink</span> <span class="at">--vcf</span> raw_rename.vcf.gz <span class="at">--maf</span> 0.05 <span class="at">--geno</span> 0.2 <span class="at">--recode</span> vcf-fid <span class="at">--out</span> Gh_383.maf0.05.int0.8</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 生成emmax分析所需要的plink文件</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">plink</span> <span class="at">--vcf</span> Gh_383.maf0.05.int0.8.vcf <span class="at">--recode</span> 12 transpose <span class="at">--output-missing-genotype</span> 0 <span class="at">--out</span> Gh_383.maf0.05.int0.9</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><font color="green"><strong>第三步:</strong></font> 根据LD对SNP筛选，构建运行群体结构分析的基因型文件</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 过滤LD</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">plink</span> <span class="at">--vcf</span> Gh_383.maf0.05.int0.8.vcf <span class="at">--indep-pairwise</span> 50 10 0.2 <span class="at">--out</span> Gh_383.maf0.05.int0.8</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 提取筛选SNP id</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ex">plink</span> <span class="at">--vcf</span> Gh_383.maf0.05.int0.8.vcf <span class="at">--make-bed</span> <span class="at">--extract</span> Gh_383.maf0.05.int0.8.prune.in <span class="at">--out</span> Gh_383.maf0.05.int0.8.prune.in</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 将筛选后的in结果转换为vcf</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="ex">plink</span> <span class="at">--bfile</span> Gh_383.maf0.05.int0.8.prune.in <span class="at">--recode</span> vcf-fid <span class="at">--out</span> Gh_383.maf0.05.int0.8.prune.in</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 转换为admixture需要的输入文件格式</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="ex">plink</span> <span class="at">-bfile</span> Gh_383.maf0.05.int0.8.prune.in <span class="at">--recode</span> 12 <span class="at">--out</span> Gh_383.maf0.05.int0.8.prune.in</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><font color="green"><strong>第四步:</strong></font> 利用admixture进行群体结构分析.</p>
+<p>通过下面代码进行admixture群体结构分析，根据结果选择合适的K值，然后选择对应的群体结构协变量文件</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="dt">{</span><span class="dv">1</span><span class="dt">..</span><span class="dv">20</span><span class="dt">}</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">do</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">admixture</span> <span class="at">--cv</span> Gh_383.maf0.05.int0.8.prune.in.ped <span class="va">${i}</span> <span class="at">-j48</span> <span class="op">&gt;&gt;</span> log.txt</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">##&gt; 运行结束后通过下面代码查看最佳分群</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> grep CV log.txt </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">##&gt; emmax-cov进行格式转换</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="ex">emmax-cov</span> <span class="at">-n</span> Gh_383.maf0.05.int0.8 <span class="dt">\</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">-q</span> admixture.Q3</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>          <span class="ex">-o</span> Cov_Q3_emmax.cov</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>          <span class="ex">-k</span> 3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><font color="green"><strong>第五步:</strong></font> 利用emmax-kin生成亲缘关系矩阵</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">emmax-kin</span> Gh_383.maf0.05.int0.8 <span class="at">-v</span> <span class="at">-d</span> 10</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 运行完毕Gh_383.maf0.05.int0.8.BN.kinf 文件</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>至此运行emmax的基因型文件，协变量文件已经具备了。</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">(vep) shawn @ bio-Super-Server</span><span class="kw">:</span><span class="at"> 01.raw_g $ tree</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="at">.</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="at">├── Cov_P3_emmax.cov</span><span class="co"> # 协变量文件 PCA</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="at">├── Cov_Q3_emmax.cov</span><span class="co"> # 协变量文件 群体结构</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="at">├── Gh_383.maf0.05.int0.8.bed</span><span class="co"> # 基因型文件plink格式 二进制</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="at">├── Gh_383.maf0.05.int0.8.bim</span><span class="co"> # 基因型文件plink格式 二进制</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="at">├── Gh_383.maf0.05.int0.8.fam</span><span class="co"> # 基因型文件plink格式 二进制</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="at">├── Gh_383.maf0.05.int0.8.hBN.kinf</span><span class="co"> #亲缘关系矩阵</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="at">├── Gh_383.maf0.05.int0.8.log</span><span class="co"> # 基因型文件plink格式 二进制</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="at">├── Gh_383.maf0.05.int0.8.nosex</span><span class="co"> # 基因型文件plink格式</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="at">├── Gh_383.maf0.05.int0.8.tfam</span><span class="co"> # 基因型文件plink格式</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="at">├── Gh_383.maf0.05.int0.8.tped</span><span class="co"> # 基因型文件plink格式</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="at">├── Gh_383.maf0.05.int0.8.vcf</span><span class="co"> # 基因型文件 vcf格式</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="snp注释文件准备" class="level2">
+<h2 class="anchored" data-anchor-id="snp注释文件准备">SNP注释文件准备</h2>
+<p>通过vep软件对snp文件进行注释</p>
+<p>代码：</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 格式化</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">"#"</span> CRI_Gh_v2.gff3 <span class="kw">|</span> <span class="fu">sort</span> <span class="at">-k1,1</span> <span class="at">-k4,4n</span> <span class="at">-k5,5n</span> <span class="at">-t</span><span class="st">$'</span><span class="dt">\t</span><span class="st">'</span> <span class="kw">|</span> <span class="ex">bgzip</span> <span class="at">-c</span> <span class="op">&gt;</span> data.gff.gz</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># tabix索引</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="ex">tabix</span> <span class="at">-p</span> gff data.gff.gz</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 注释</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="ex">vep</span> <span class="at">-i</span>  raw.vcf.gz  <span class="at">--gff</span> data.gff.gz <span class="at">--fasta</span> CRI_Gh_v2.fa <span class="at">--fork</span> 4 <span class="at">--tab</span> <span class="at">-o</span> Gh_383_anno.xls Gh_383_anno.html</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="表型数据准备" class="level2">
+<h2 class="anchored" data-anchor-id="表型数据准备">表型数据准备</h2>
+<p>首先按照下表准备好输入表型文件<code>traits.txt</code></p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>sample</th>
+<th>trait1</th>
+<th>trait2</th>
+<th>trait3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>s_001</td>
+<td>212</td>
+<td>123</td>
+<td>NA</td>
+</tr>
+<tr class="even">
+<td>s_002</td>
+<td>221</td>
+<td>1223</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>s_004</td>
+<td>NA</td>
+<td>123</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<p>然后运行</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>emmax<span class="sc">-</span>pheon<span class="sc">-</span>split <span class="sc">-</span>t Gh_383.maf0.<span class="fl">05.</span>int0.<span class="fl">8.</span>tfam <span class="sc">-</span>p traits.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>然后我们就得到了<code>trait1.txt trait2.txt trait3.txt</code>可以用于emmax表型分析的文件</p>
+<p>至此，所有运行下游分析的文件都准备完毕</p>
+</section>
+<section id="emmax一步流程" class="level2">
+<h2 class="anchored" data-anchor-id="emmax一步流程">Emmax一步流程</h2>
+<p>首先我们看下帮助文档</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">-------------------------------</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Emmax</span> pipeline . From raw to Manhattan plot</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="ex">-------------------------------</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="ex">Usage:</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="ex">run_emmax_pipline</span> <span class="dt">\</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a> <span class="at">-t</span> <span class="pp">[</span><span class="ss">tpedf_prefix</span><span class="pp">]</span> <span class="dt">\</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a> <span class="at">-o</span> <span class="pp">[</span><span class="ss">out_prefix</span><span class="pp">]</span> <span class="dt">\</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a> <span class="at">-p</span> <span class="pp">[</span><span class="ss">phenof</span><span class="pp">]</span> <span class="dt">\</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a> <span class="at">-k</span> <span class="pp">[</span><span class="ss">kinf</span><span class="pp">]</span> <span class="dt">\</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a> <span class="at">-a</span> <span class="pp">[</span><span class="ss">anno</span><span class="pp">]</span> <span class="dt">\</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a> <span class="at">-c</span> <span class="pp">[</span><span class="ss">covf</span><span class="pp">]</span> <span class="er">(</span><span class="ex">option</span><span class="kw">)</span> <span class="dt">\</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a> <span class="ex">-i</span> <span class="pp">[</span><span class="ss">img_type</span><span class="pp">]</span> <span class="er">(</span><span class="ex">option</span><span class="kw">)</span> <span class="dt">\</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a> <span class="ex">-s</span> <span class="pp">[</span><span class="ss">point_size</span><span class="pp">]</span> <span class="er">(</span><span class="ex">option</span><span class="kw">)</span> <span class="dt">\</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a> <span class="ex">-w</span> <span class="pp">[</span><span class="ss">point_color</span><span class="pp">]</span> <span class="er">(</span><span class="ex">option</span><span class="kw">)</span> <span class="dt">\</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a> <span class="ex">-r</span> <span class="pp">[</span><span class="ss">rerun</span><span class="pp">]</span> <span class="er">(</span><span class="ex">option</span><span class="kw">)</span> <span class="dt">\</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="ex">-------------------------------</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="ex">Author</span> Shawn Wang <span class="er">(</span><span class="ex">shawnwang2016@126.com</span><span class="kw">)</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="ex">Date</span> Web Apr 26, 2023</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="ex">Version</span> V.0.0.0.99 beta</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="ex">-------------------------------</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="ex">Required</span> parameters:</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a><span class="ex">[-t]:tpedf_prefix,</span>   prefix for tped/tfam files</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a><span class="ex">[-o]:out_prefix,</span>  output file name prefix</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a><span class="ex">[-p]:phenof,</span>  3-column phenotype file with FAMID, INDID at the first two colmns, in the same order of .tfam file.</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a><span class="ex">[-k]:kinf,</span>  n <span class="pp">*</span> n matrix containing kinship values in the individual order consistent to <span class="pp">[</span><span class="ss">tpedf</span><span class="pp">]</span>.tfam file. <span class="pp">[</span><span class="ss">tpedf</span><span class="pp">]</span>.kinf will be used if not specified.</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a><span class="ex">[-a]:anno,</span>  SNP annotation file by vep.</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a><span class="ex">Optional</span> parameters:</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a><span class="ex">[-c]:covf,</span>  multi-column covariate file with FAMID, INDID at the first two colmns, in the same order of .tfam fileOptional parameters.</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a><span class="ex">[-i]:img_type,</span>  output img file type, jpg or pdf.</span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a><span class="ex">[-s]:point_size,</span>  point size of manhattan plot, default: cut_off 0_4_6 ==<span class="op">&gt;</span> 0.3_0.5_0.5.</span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a><span class="ex">[-w]:point_color,</span>  point color of manhattan plot, default: cut_off 4_6 ==<span class="op">&gt;</span> green_red.</span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a><span class="ex">[-r]:rerun,</span>  If you need to rerun, please use this parameter. 1, 2 or 12</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a><span class="ex">-------------------------------</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ul>
+<li><font color="blue"><strong>必选参数</strong></font> -t plink 生成的转置的emmax文件 -o 输出文件的前缀 -p 表型文件 -k 亲缘关系矩阵 -a 注释文件</li>
+<li><font color="orange"><strong>可选参数</strong></font> -c 协变量文件 -i 输出图片文件格式 -s 曼哈顿图点的大小 -w 显著位点点的颜色（-logp 4，6） -r 断点重新运行</li>
+</ul>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">run_emmax_pipeline</span> <span class="dt">\</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-t</span> Gh_383.maf0.05.int0.8 <span class="dt">\</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-o</span> Morin_raw <span class="dt">\</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-p</span> Morin.txt <span class="dt">\</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">-k</span> Gh_383.maf0.05.int0.8.hBN.kinf <span class="dt">\</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">-a</span> Gh_383_anno.xls <span class="dt">\</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">-c</span> Cov_Q3_emmax.cov</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>大概等待10分钟左右就可以出结果，基因型文件较小的话更快。</p>
+<p>运行完毕得到的文件如下：</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> LDFilebyChr =<span class="op">&gt;</span> #我们根据显染色体上显著位点的个数提取了前5个chr的基因型文件数据用来做LDblock</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ex">│&nbsp;&nbsp;</span> ├── A01_genotype.txt</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="ex">│&nbsp;&nbsp;</span> ├── A11_genotype.txt</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="ex">│&nbsp;&nbsp;</span> └── D07_genotype.txt</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss.log</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss.ps =<span class="op">&gt;</span> # emmax 输出的包含位点p值的结果文件</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss.reml</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss_result_filter.gwas =<span class="op">&gt;</span> #格式化后的结果文件，用与使用IGV看结果</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss_result_filter.xlsx =<span class="op">&gt;</span> #Excel文件，包含显著位点的snp信息，包括了p值和snp注释</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss_result_genotype_all.txt</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> QQplot.Morin_Flower_miss.jpg =<span class="op">&gt;</span> #QQ 图</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> Rectangular-Manhattan.Morin_Flower_miss.jpg =<span class="op">&gt;</span> #曼哈顿图</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="emmax-下游分析" class="level1">
+<h1>Emmax 下游分析</h1>
+<section id="确定ldblock画图范围" class="level2">
+<h2 class="anchored" data-anchor-id="确定ldblock画图范围">确定LDblock画图范围</h2>
+<p>首先可以通过Morin_Flower_miss_result_filter.xlsx 文件中连续高信号出现染色体位置划分范围。 其次可以通过用IGV看Morin_Flower_miss_result_filter.gwas 划定范围</p>
+</section>
+<section id="进行ldblock可视化" class="level2">
+<h2 class="anchored" data-anchor-id="进行ldblock可视化">进行LDblock可视化</h2>
+<p>通过LDblock进行可视化</p>
+<p>经过测试，报错的原因主要是染色体名字不符，许多软件在做gwas分析的时候都会改变chr的前缀，导致基因型文件中染色体标志和gff文件中的不符合，此时需要用bcftools重新修改基因型文件。</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">LDBlockShow</span> <span class="at">-InGFF</span>  ~/GeekCloud/01.Database/Cotton/AD1/Gh.gff <span class="at">-Cutline</span> 6 <span class="at">-OutPdf</span> <span class="at">-SeleVar</span> 2 <span class="at">-TopSite</span> <span class="at">-InGenotype</span> A11_Gh_383_miss.geno <span class="at">--OutPut</span> Morin_A11_BGLU <span class="at">--InGWAS</span> A11_genotype.txt <span class="at">-Region</span> A11:91108756:91221656 <span class="kw">&amp;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
