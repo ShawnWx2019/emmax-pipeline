@@ -1,17 +1,4 @@
----
-title: "emmax-pipeline 流程搭建与使用"
-author: "Shawn Wang"
-date: Jun 04,2023
-format:
-  html:
-    code-fold: true
-    code-summary: "Show the code"
-    code-copy: true
-editor: 
-  markdown: 
-    wrap: 72
-bibliography:  PosDocProject.bib
----
+Emmax-pipeline
 
 <center>
 
@@ -25,7 +12,7 @@ bibliography:  PosDocProject.bib
 
 ![Overview](Emmax-pipeline.png)
 
-```{r,message=FALSE, warning=FALSE, include=FALSE, out.width='100%'}
+```r
 suppressMessages(library(bruceR))
 suppressMessages(library(PCAtools))
 suppressMessages(library(tidymass))
@@ -47,7 +34,7 @@ suppressMessages(library(plotly))
 
 代码如下：
 
-```{bash eval=F}
+```bash
 #| code-fold: true
 #| code-summary: "Show the code"
 #> 下载到电脑
@@ -124,7 +111,7 @@ conda clean -i #清理index cache
 
 代码如下：
 
-```{bash eval=F}
+```bash
 #| code-fold: true
 #| code-summary: "Show the code"
 conda create -c bioconda -n gwas bcftools vcftools plink tassel admixture beagle fasttree tabix samtools gatk -y
@@ -146,7 +133,7 @@ emmax有可以直接在unbuntu20.04编译好的软件 直接下载，解压使�
 
 代码：
 
-```{bash eval=F}
+```bash
 #| code-fold: true
 #| code-summary: "Show the code"
 wget http://csg.sph.umich.edu//kang/emmax/download/emmax-beta-07Mar2010.tar.gz
@@ -205,7 +192,7 @@ emmax
 
 代码：
 
-```{bash eval=F}
+```bash
 #| code-fold: true
 #| code-summary: "Show the code"
 cd # 返回家目录
@@ -233,7 +220,7 @@ source ~/.bash_alias
 
 <font color=green>**第一步:**</font> 首先emmax要求染色体为纯数字，如果你发现GATK生成的vcf文件中染色体为"chr01"等并非纯数字时需要通过bcftools修改一下染色体。
 
-```{bash eval=F}
+```bash
 #| code-fold: true
 #| code-summary: "Show the code"
 ##> GATK 一般不会给snp加ID，这里用bcftools对vcf文件中snp命名，方式为chr:pos
@@ -257,7 +244,7 @@ bcftools index -t raw_rename.vcf.gz
 
 <font color=green>**第二步:**</font> 用plink对vcf文件过滤，生成的`Gh_383.maf0.05.int0.8.vcf`
 
-```{bash eval=F}
+```bash
 #| code-fold: true
 #| code-summary: "Show the code"
 plink --vcf raw_rename.vcf.gz --maf 0.05 --geno 0.2 --recode vcf-fid --out Gh_383.maf0.05.int0.8
@@ -267,7 +254,7 @@ plink --vcf Gh_383.maf0.05.int0.8.vcf --recode 12 transpose --output-missing-gen
 
 <font color=green>**第三步:**</font> 根据LD对SNP筛选，构建运行群体结构分析的基因型文件
 
-```{bash eval=F}
+```bash
 #| code-fold: true
 #| code-summary: "Show the code"
 #> 过滤LD
@@ -284,7 +271,7 @@ plink -bfile Gh_383.maf0.05.int0.8.prune.in --recode 12 --out Gh_383.maf0.05.int
 
 通过下面代码进行admixture群体结构分析，根据结果选择合适的K值，然后选择对应的群体结构协变量文件
 
-```{bash eval=F}
+```bash
 #| code-fold: true
 #| code-summary: "Show the code"
 for i in {1..20}
@@ -292,7 +279,7 @@ do
 admixture --cv Gh_383.maf0.05.int0.8.prune.in.ped ${i} -j48 >> log.txt
 done
 ##> 运行结束后通过下面代码查看最佳分群
-$ grep CV log.txt 
+$ grep CV log.txt
 ##> emmax-cov进行格式转换
 
 emmax-cov -n Gh_383.maf0.05.int0.8 \
@@ -303,7 +290,7 @@ emmax-cov -n Gh_383.maf0.05.int0.8 \
 
 <font color=green>**第五步:**</font> 利用emmax-kin生成亲缘关系矩阵
 
-```{bash eval=F}
+```bash
 #| code-fold: true
 #| code-summary: "Show the code"
 emmax-kin Gh_383.maf0.05.int0.8 -v -d 10
@@ -312,7 +299,7 @@ emmax-kin Gh_383.maf0.05.int0.8 -v -d 10
 
 至此运行emmax的基因型文件，协变量文件已经具备了。
 
-```{yaml eval=F}
+```yaml
 (vep) shawn @ bio-Super-Server: 01.raw_g $ tree
 .
 ├── Cov_P3_emmax.cov # 协变量文件 PCA
@@ -334,7 +321,7 @@ emmax-kin Gh_383.maf0.05.int0.8 -v -d 10
 
 代码：
 
-```{bash eval=F}
+```bash
 
 # 格式化
 grep -v "#" CRI_Gh_v2.gff3 | sort -k1,1 -k4,4n -k5,5n -t$'\t' | bgzip -c > data.gff.gz
@@ -356,7 +343,7 @@ vep -i  raw.vcf.gz  --gff data.gff.gz --fasta CRI_Gh_v2.fa --fork 4 --tab -o Gh_
 
 然后运行
 
-```{r eval=FALSE}
+```bash
 emmax-pheon-split -t Gh_383.maf0.05.int0.8.tfam -p traits.txt
 ```
 
@@ -368,7 +355,7 @@ emmax-pheon-split -t Gh_383.maf0.05.int0.8.tfam -p traits.txt
 
 首先我们看下帮助文档
 
-```{bash eval=F}
+```bash
 -------------------------------
 
 Emmax pipeline . From raw to Manhattan plot
@@ -420,7 +407,7 @@ Optional parameters:
 -   <font color=blue>**必选参数**</font> -t plink 生成的转置的emmax文件 -o 输出文件的前缀 -p 表型文件 -k 亲缘关系矩阵 -a 注释文件
 -   <font color=orange>**可选参数**</font> -c 协变量文件 -i 输出图片文件格式 -s 曼哈顿图点的大小 -w 显著位点点的颜色（-logp 4，6） -r 断点重新运行
 
-```{bash eval=F}
+```bash
 run_emmax_pipeline \
   -t Gh_383.maf0.05.int0.8 \
   -o Morin_raw \
@@ -434,7 +421,7 @@ run_emmax_pipeline \
 
 运行完毕得到的文件如下：
 
-```{bash eval=FALSE}
+```bash
 ── LDFilebyChr => #我们根据显染色体上显著位点的个数提取了前5个chr的基因型文件数据用来做LDblock
 │   ├── A01_genotype.txt
 │   ├── A11_genotype.txt
@@ -463,6 +450,6 @@ run_emmax_pipeline \
 
 经过测试，报错的原因主要是染色体名字不符，许多软件在做gwas分析的时候都会改变chr的前缀，导致基因型文件中染色体标志和gff文件中的不符合，此时需要用bcftools重新修改基因型文件。
 
-```{bash eval=F}
+```bash
 LDBlockShow -InGFF  ~/GeekCloud/01.Database/Cotton/AD1/Gh.gff -Cutline 6 -OutPdf -SeleVar 2 -TopSite -InGenotype A11_Gh_383_miss.geno --OutPut Morin_A11_BGLU --InGWAS A11_genotype.txt -Region A11:91108756:91221656 &
 ```
