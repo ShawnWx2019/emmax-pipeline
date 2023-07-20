@@ -143,13 +143,14 @@ anno <-
   relocate(Chromosome,.after = SNP) %>%
   relocate(Position,.after = Chromosome)
 message(msg_run("QQ plot ..."))
-CMplot(clean,plot.type="q",conf.int.col=NULL,box=TRUE,file=img_type,memo="",dpi=300,cex = .3,
-       file.output=TRUE,verbose=TRUE)
+CMplot(clean,plot.type="q",box=FALSE,file="jpg",file.name="",dpi=300,
+    conf.int=TRUE,conf.int.col=NULL,threshold.col="red",threshold.lty=2,
+    file.output=TRUE,verbose=TRUE,width=5,height=5)
 message(msg_run("Manhattan plot ..."))
 CMplot(clean, plot.type="m", LOG10=TRUE, ylim=NULL, threshold=c(1e-6,1e-4),threshold.lty=c(1,2),
        threshold.lwd=c(1,1), threshold.col=c("black","grey"), amplify=TRUE,bin.size=1e6,
        chr.den.col=c("darkgreen", "yellow", "red"),signal.col=c(point_color[2],point_color[1]),signal.cex=c(point_size[3],point_size[1]),
-       signal.pch=c(19,19),file=img_type,memo="",dpi=300,file.output=TRUE,verbose=TRUE,cex = point_size[1],
+       signal.pch=c(19,19),file=img_type,dpi=300,file.output=TRUE,verbose=TRUE,cex = point_size[1],
        width=22,height=8)
 message(msg_yes("Step1 finish!"))
 
