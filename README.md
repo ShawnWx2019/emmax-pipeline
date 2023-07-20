@@ -1,4 +1,4 @@
-Emmax-pipeline
+# Emmax-pipeline
 
 <center>
 
@@ -10,7 +10,7 @@ Emmax-pipeline
 
 </center>
 
-![Overview](Emmax-pipeline.png)
+![Overview](https://github.com/ShawnWx2019/emmax-pipeline/blob/main/www/Emmax-pipeline.png)
 
 ```r
 suppressMessages(library(bruceR))
