@@ -127,7 +127,7 @@ message(msg_run("Step1. Import data ..."))
 message(msg_yes("\n-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-\n"))
 genofile <- read.delim(genopath,header = F)
 
-sample_order <- read.delim(fampath,header = F)
+sample_order <- read.delim(fampath,header = F,sep = " ")
 
 tree <- read.newick(treepath)
 
@@ -149,36 +149,36 @@ message(msg_yes("\n-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-
 
 ##> add sample name and convert to long table
 geno_clean <-
-  genofile %>% 
+  genofile %>%
   dplyr::filter(
     V2 >= start & V2 <= end ## filter snps
-  ) %>% tidyr::separate(col = V3,into = c(sample_order$V2),sep = ' ',convert = T) %>% 
-  pivot_longer(-c(V1,V2),names_to = 'sample',values_to = 'geno') %>% 
-  set_names('chr','pos','sample','geno')%>% 
+  ) %>% tidyr::separate(col = V3,into = c(sample_order$V2),sep = ' ',convert = T) %>%
+  pivot_longer(-c(V1,V2),names_to = 'sample',values_to = 'geno') %>%
+  set_names('chr','pos','sample','geno')%>%
   mutate(
     tag1 = case_when(
       geno == "N" ~ "Missing",
       geno != "N" & geno != "A" & geno != "T" & geno != "G" & geno != "C" ~ "Heterozygous",
       geno == "A" | geno == "T" | geno == "G" | geno == "C" ~ "Homogeneous"
     )
-  ) 
+  )
 ##> find major and minor allel.
 
 geno_final_long <-
-  geno_clean %>% 
-  filter(tag1 == "Homogeneous") %>% 
-  group_by(chr,pos,tag1,geno) %>% 
-  summarise(n = n()) %>% 
-  group_by(chr,pos) %>% 
+  geno_clean %>%
+  filter(tag1 == "Homogeneous") %>%
+  group_by(chr,pos,tag1,geno) %>%
+  summarise(n = n()) %>%
+  group_by(chr,pos) %>%
   mutate(
     tag2 = case_when(
       n ==  max(n) ~ 'Major',
       n == min(n) ~ 'Minor'
     )
-  ) %>% 
-  ungroup() %>% 
-  select(-n) %>% 
-  right_join(geno_clean) %>% 
+  ) %>%
+  ungroup() %>%
+  select(-n) %>%
+  right_join(geno_clean) %>%
   mutate(
     tag = case_when(
       is.na(tag2) ~ tag1,
@@ -190,15 +190,15 @@ geno_final_long <-
       tag == 'Minor' ~ 2,
       tag == 'Major' ~ 3
     )
-  ) %>% 
+  ) %>%
   select(-tag1,tag2)
 
 ##> convert numeric genodata and tag genodata
 
-geno_num <- 
+geno_num <-
   geno_final_long %>%
-  mutate(SNP = paste0(chr,':',pos)) %>% 
-  select(SNP,sample,tagNum) %>% 
+  mutate(SNP = paste0(chr,':',pos)) %>%
+  select(SNP,sample,tagNum) %>%
   pivot_wider(names_from = sample, values_from = tagNum)
 
 ##> convert order plhlo tree and convert to dendrogram
@@ -212,9 +212,9 @@ tree_clado <- as.cladogram(tree_dend)
 message(msg_run("Step3. Ordered Haplotype heatmap by laddered NJ tree ..."))
 message(msg_yes("\n-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-\n"))
 ##> ordered numeric table by original tree.
-tbl_ht <- geno_num %>% 
-  column_to_rownames("SNP") %>% 
-  select(tree$tip.label) %>% 
+tbl_ht <- geno_num %>%
+  column_to_rownames("SNP") %>%
+  select(tree$tip.label) %>%
   t()
 message(msg_run("Step4. Haplotype heatmap using all SNPs"))
 message(msg_yes("\n-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-\n"))
@@ -262,22 +262,22 @@ message(msg_run("Step5. Haplotype heatmap using top 1000 (low missing rate) SNPs
 message(msg_yes("\n-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-\n"))
 
 ##> thin genotype data, slice the top 1000 snps with lower missing rate.
-tmp_tbl =   tbl_ht %>% 
-  t() %>% 
-  as.data.frame() %>% 
+tmp_tbl =   tbl_ht %>%
+  t() %>%
+  as.data.frame() %>%
   rownames_to_column("SNP")
-tbl_ht_order_thin_1000 <- 
- tmp_tbl%>% 
+tbl_ht_order_thin_1000 <-
+ tmp_tbl%>%
   mutate(
     zerocount = rowSums(.[,-1] != 0)
-  ) %>% 
-  arrange(zerocount) %>% 
-  slice(1:1000)%>% 
-  select(-zerocount) %>% 
-  right_join(tmp_tbl %>% select("SNP"),by="SNP") %>% 
-  drop_na() %>% 
-  distinct() %>% 
-  column_to_rownames("SNP") %>% 
+  ) %>%
+  arrange(zerocount) %>%
+  slice(1:1000)%>%
+  select(-zerocount) %>%
+  right_join(tmp_tbl %>% select("SNP"),by="SNP") %>%
+  drop_na() %>%
+  distinct() %>%
+  column_to_rownames("SNP") %>%
   t()
 
 ht_num_thin_high_res <-
@@ -300,7 +300,7 @@ ht_out_thin =draw(ht_num_thin_high_res)
 dev.off()
 
 ##> arrange with hclust
-ht_hclust <- 
+ht_hclust <-
   Heatmap(
     matrix = tbl_ht_order_thin_1000,
     col = circlize::colorRamp2(breaks = c(0,1,2,3),colors = colorkey),
@@ -325,24 +325,24 @@ message(msg_yes("\n-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-
 
 sample_order <- row_order(ht_out)
 
-tbl_ht_order <- 
-  tbl_ht %>% 
-    t() %>% 
-    as.data.frame() %>% 
-    select(all_of(sample_order)) %>% 
+tbl_ht_order <-
+  tbl_ht %>%
+    t() %>%
+    as.data.frame() %>%
+    select(all_of(sample_order)) %>%
     rownames_to_column("SNP")
 
-tbl_ht_order_thin <- 
-  tmp_tbl%>% 
+tbl_ht_order_thin <-
+  tmp_tbl%>%
   mutate(
     zerocount = rowSums(.[,-1] != 0)
-  ) %>% 
-  arrange(zerocount) %>% 
-  slice(1:1000)%>% 
-  select(-zerocount) %>% 
-  right_join(tmp_tbl %>% select("SNP"),by="SNP") %>% 
-  drop_na() %>% 
-  distinct() %>% 
+  ) %>%
+  arrange(zerocount) %>%
+  slice(1:1000)%>%
+  select(-zerocount) %>%
+  right_join(tmp_tbl %>% select("SNP"),by="SNP") %>%
+  drop_na() %>%
+  distinct() %>%
   select(SNP,all_of(sample_order))
 out = list(
   all_snp = tbl_ht_order,
@@ -352,7 +352,7 @@ write_xlsx(x = out,path = paste0(output,"_ordered_geno_num.xlsx"))
 
 ##> export phenotype in order
 
-phenotype_order <- 
+phenotype_order <-
   left_join(
     data.frame(Sample = colnames(tbl_ht_order)[-1]),
     phenotype,by = "Sample"

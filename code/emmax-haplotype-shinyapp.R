@@ -1057,7 +1057,7 @@ server <- function(input,output,session) {
   famfile <- reactive({
     file3 <- input$fampath
     if(is.null(file3)){return()}
-    read.delim(file = file3$datapath,header = F)
+    read.delim(file = file3$datapath,header = F,sep = " ")
   })
   phenfile <- reactive({
     file4 <- input$phenopath
@@ -1166,7 +1166,8 @@ server <- function(input,output,session) {
                        if(i == 1) {
                          ht_obj$tmp_tbl =
                            ht_obj$tbl_ht %>%
-                           t() %>% as.data.frame() %>% rownames_to_column("SNP")
+                           t() %>% as.data.frame() %>% rownames_to_column("SNP") %>%
+                           arrange(SNP)
                          ht_obj$final_tbl =
                            ht_obj$tmp_tbl %>%
                            mutate(
@@ -1178,6 +1179,7 @@ server <- function(input,output,session) {
                            right_join(ht_obj$tmp_tbl %>% select("SNP"),by="SNP") %>%
                            drop_na() %>%
                            distinct() %>%
+                           arrange(SNP) %>%
                            column_to_rownames("SNP") %>%
                            t()
                        } else if (i == 2) {
@@ -1464,7 +1466,7 @@ server <- function(input,output,session) {
     input$adjust1,
     {
       download$width1 = as.numeric(input$width1)
-      download$height1 = as.numeric(input$width1)
+      download$height1 = as.numeric(input$height1)
     }
   )
 
@@ -1472,7 +1474,7 @@ server <- function(input,output,session) {
     input$adjust2,
     {
       download$width2 = as.numeric(input$width2)
-      download$height2 = as.numeric(input$width2)
+      download$height2 = as.numeric(input$height2)
     }
   )
   #> 3.2  download tables ---------
