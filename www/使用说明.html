@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.353">
+<meta name="generator" content="quarto-1.2.335">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -19,10 +19,9 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -49,13 +48,43 @@ pre.numberSource code > span > a:first-child::before
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
     padding: 0 4px; width: 4em;
+    color: #aaaaaa;
   }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
   {   }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -116,7 +145,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="Emmax-pipeline.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Overview</figcaption>
+<p></p><figcaption class="figure-caption">Overview</figcaption><p></p>
 </figure>
 </div>
 <section id="环境配置和软件安装" class="level1">
@@ -252,17 +281,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">-c</span> bioconda <span class="at">-n</span> gwas bcftools vcftools plink tassel admixture beagle fasttree tabix samtools gatk <span class="at">-y</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 安装成功后可以看到以下提醒</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># To activate this environment, use</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#     $ conda activate gwas</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># To deactivate an active environment, use</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#     $ conda deactivate</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 单独给vep创建一个环境</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">-c</span> bioconda <span class="at">-n</span> ensembl-vep vep <span class="at">-y</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">-c</span> bioconda <span class="at">-n</span> gwas bcftools samtools openssl=1.0  <span class="at">-y</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install <span class="at">-c</span> plink tassel admixture beagle fasttree tabix vcftools gatk <span class="at">-y</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 安装成功后可以看到以下提醒</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># To activate this environment, use</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#     $ conda activate gwas</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># To deactivate an active environment, use</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#     $ conda deactivate</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 单独给vep创建一个环境</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">-c</span> bioconda <span class="at">-n</span> ensembl-vep vep <span class="at">-y</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -353,18 +383,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>数据准备好后执行该脚本会将下游分析一键完成</td>
 </tr>
 <tr class="even">
+<td>基因型文件格式转换</td>
+<td>hap2geno.R</td>
+<td>hap2geno</td>
+<td>将hapmap格式文件转换成LD block 需要的基因文件</td>
+</tr>
+<tr class="odd">
 <td>开始关联分析及下游文件生成</td>
 <td>EMMAX_DownStream.R</td>
 <td>emmax-down</td>
 <td>已经被集成到run_emmax-pipeline</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>区域单倍型划分</td>
 <td>emmax-haplotype.sh</td>
 <td>emmax-haplotype</td>
 <td>根据候选区间进行单倍型划分</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>区域单倍型热图</td>
 <td>emmax-haploheatmap.R</td>
 <td>emmax-haploheatmap</td>
@@ -386,7 +422,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"alias run_emmax_pipeline='bash ~/src/emmax-pipeline/code/run_emmax_pipeline.sh'"</span> <span class="op">&gt;&gt;</span> ~/.bash_alias</span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"alias emmax-haplotype='bash ~/src/emmax-pipeline/code/emmax-haplotype.sh'"</span> <span class="op">&gt;&gt;</span> ~/.bash_alias</span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"alias emmax-haploheatmap='Rscript ~/src/emmax-pipeline/code/emmax-haploheatmap.R'"</span> <span class="op">&gt;&gt;</span> ~/.bash_alias</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bash_alias</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"alias hap2geno='Rscript ~/src/emmax-pipeline/code/hap2geno.R'"</span> <span class="op">&gt;&gt;</span> ~/.bash_alias</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bash_alias</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>至此，上游分析环境搭建工作完毕。</p>
@@ -569,16 +606,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="ex">Usage:</span></span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="ex">run_emmax_pipline</span> <span class="dt">\</span></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a> <span class="at">-t</span> <span class="pp">[</span><span class="ss">tpedf_prefix</span><span class="pp">]</span> <span class="dt">\</span></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a> <span class="at">-o</span> <span class="pp">[</span><span class="ss">out_prefix</span><span class="pp">]</span> <span class="dt">\</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a> <span class="at">-p</span> <span class="pp">[</span><span class="ss">phenof</span><span class="pp">]</span> <span class="dt">\</span></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a> <span class="at">-k</span> <span class="pp">[</span><span class="ss">kinf</span><span class="pp">]</span> <span class="dt">\</span></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a> <span class="at">-a</span> <span class="pp">[</span><span class="ss">anno</span><span class="pp">]</span> <span class="dt">\</span></span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a> <span class="at">-c</span> <span class="pp">[</span><span class="ss">covf</span><span class="pp">]</span> <span class="er">(</span><span class="ex">option</span><span class="kw">)</span> <span class="dt">\</span></span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a> <span class="ex">-i</span> <span class="pp">[</span><span class="ss">img_type</span><span class="pp">]</span> <span class="er">(</span><span class="ex">option</span><span class="kw">)</span> <span class="dt">\</span></span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a> <span class="ex">-s</span> <span class="pp">[</span><span class="ss">point_size</span><span class="pp">]</span> <span class="er">(</span><span class="ex">option</span><span class="kw">)</span> <span class="dt">\</span></span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a> <span class="ex">-w</span> <span class="pp">[</span><span class="ss">point_color</span><span class="pp">]</span> <span class="er">(</span><span class="ex">option</span><span class="kw">)</span> <span class="dt">\</span></span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a> <span class="ex">-r</span> <span class="pp">[</span><span class="ss">rerun</span><span class="pp">]</span> <span class="er">(</span><span class="ex">option</span><span class="kw">)</span> <span class="dt">\</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a> <span class="at">-t</span> [tpedf_prefix] <span class="dt">\</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a> <span class="at">-o</span> [out_prefix] <span class="dt">\</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a> <span class="at">-p</span> [phenof] <span class="dt">\</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a> <span class="at">-k</span> [kinf] <span class="dt">\</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a> <span class="at">-a</span> [anno] <span class="dt">\</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a> <span class="at">-c</span> [covf] <span class="er">(</span><span class="ex">option</span><span class="kw">)</span> <span class="dt">\</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a> <span class="ex">-i</span> [img_type] <span class="er">(</span><span class="ex">option</span><span class="kw">)</span> <span class="dt">\</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a> <span class="ex">-s</span> [point_size] <span class="er">(</span><span class="ex">option</span><span class="kw">)</span> <span class="dt">\</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a> <span class="ex">-w</span> [point_color] <span class="er">(</span><span class="ex">option</span><span class="kw">)</span> <span class="dt">\</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a> <span class="ex">-r</span> [rerun] <span class="er">(</span><span class="ex">option</span><span class="kw">)</span> <span class="dt">\</span></span>
 <span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="ex">-------------------------------</span></span>
@@ -594,7 +631,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a><span class="ex">[-t]:tpedf_prefix,</span>   prefix for tped/tfam files</span>
 <span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a><span class="ex">[-o]:out_prefix,</span>  output file name prefix</span>
 <span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a><span class="ex">[-p]:phenof,</span>  3-column phenotype file with FAMID, INDID at the first two colmns, in the same order of .tfam file.</span>
-<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a><span class="ex">[-k]:kinf,</span>  n <span class="pp">*</span> n matrix containing kinship values in the individual order consistent to <span class="pp">[</span><span class="ss">tpedf</span><span class="pp">]</span>.tfam file. <span class="pp">[</span><span class="ss">tpedf</span><span class="pp">]</span>.kinf will be used if not specified.</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a><span class="ex">[-k]:kinf,</span>  n <span class="pp">*</span> n matrix containing kinship values in the individual order consistent to [tpedf].tfam file. [tpedf].kinf will be used if not specified.</span>
 <span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a><span class="ex">[-a]:anno,</span>  SNP annotation file by vep.</span>
 <span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a><span class="ex">Optional</span> parameters:</span>
@@ -629,18 +666,60 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> LDFilebyChr =<span class="op">&gt;</span> #我们根据显染色体上显著位点的个数提取了前5个chr的基因型文件数据用来做LDblock</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ex">│&nbsp;&nbsp;</span> ├── A01_genotype.txt</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="ex">│&nbsp;&nbsp;</span> ├── A11_genotype.txt</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="ex">│&nbsp;&nbsp;</span> └── D07_genotype.txt</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss.log</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss.ps =<span class="op">&gt;</span> # emmax 输出的包含位点p值的结果文件</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss.reml</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss_result_filter.gwas =<span class="op">&gt;</span> #格式化后的结果文件，用与使用IGV看结果</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss_result_filter.xlsx =<span class="op">&gt;</span> #Excel文件，包含显著位点的snp信息，包括了p值和snp注释</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss_result_genotype_all.txt</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> QQplot.Morin_Flower_miss.jpg =<span class="op">&gt;</span> #QQ 图</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> Rectangular-Manhattan.Morin_Flower_miss.jpg =<span class="op">&gt;</span> #曼哈顿图</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ex">──</span> LDFilebyChr =<span class="op">&gt;</span> #我们根据显染色体上显著位点的个数提取了前5个chr的基因型文件数据用来做LDblock</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="ex">│&nbsp;&nbsp;</span> ├── A01_genotype.txt</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="ex">│&nbsp;&nbsp;</span> ├── A11_genotype.txt</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="ex">│&nbsp;&nbsp;</span> └── D07_genotype.txt</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss.log</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss.ps =<span class="op">&gt;</span> # emmax 输出的包含位点p值的结果文件</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss.reml</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss_result_filter.gwas =<span class="op">&gt;</span> #格式化后的结果文件，用与使用IGV看结果</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss_result_filter.xlsx =<span class="op">&gt;</span> #Excel文件，包含显著位点的snp信息，包括了p值和snp注释</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Morin_Flower_miss_result_genotype_all.txt</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> QQplot.Morin_Flower_miss.jpg =<span class="op">&gt;</span> #QQ 图</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> Rectangular-Manhattan.Morin_Flower_miss.jpg =<span class="op">&gt;</span> #曼哈顿图</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="生成ldblockshow需要的基因型文件" class="level2">
+<h2 class="anchored" data-anchor-id="生成ldblockshow需要的基因型文件">生成LDblockShow需要的基因型文件</h2>
+<p><code>.geno</code></p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>chr</th>
+<th>pos</th>
+<th>genotype</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A01</td>
+<td>1</td>
+<td>A C A C N C A C A A A A A…</td>
+</tr>
+<tr class="even">
+<td>A01</td>
+<td>2</td>
+<td>C C A C N C A C C C N C N…</td>
+</tr>
+<tr class="odd">
+<td>A01</td>
+<td>3</td>
+<td>T A T N N T A T T T N T N…</td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">emmax-haplotype</span> <span class="dt">\</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">-e</span> ../Gh_383.maf0.05.int0.8_sort.hmp.txt <span class="dt">\</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">-s</span> 1 <span class="dt">\</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">-r</span> chr_new.txt <span class="dt">\</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">-t</span> 8 <span class="dt">\</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">-p</span> <span class="st">"Gh_383"</span>  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -649,7 +728,33 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1>Emmax 下游分析</h1>
 <section id="确定ldblock画图范围" class="level2">
 <h2 class="anchored" data-anchor-id="确定ldblock画图范围">确定LDblock画图范围</h2>
-<p>首先可以通过Morin_Flower_miss_result_filter.xlsx 文件中连续高信号出现染色体位置划分范围。 其次可以通过用IGV看Morin_Flower_miss_result_filter.gwas 划定范围</p>
+<p>首先可以通过Morin_Flower_miss_result_filter.xlsx 文件中连续高信号出现染色体位置划分范围。 其次可以通过用IGV看Morin_Flower_miss_result_filter.gwas 划定范围,划定范围后我们根据前面生产的文件进行根据LDblock的单倍型划分，同时绘制系统进化树和单倍型划分热图。</p>
+<div class="cell">
+<details>
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">emmax-haplotype</span> <span class="dt">\</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">-v</span> ../Gh_383.maf0.05.int0.8_sort.vcf.gz <span class="dt">\</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">-r</span> A06:85811843-91265283 <span class="dt">\</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">-g</span> ../08.LDGenotype/A06_Gh_383_miss.geno <span class="dt">\</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">-f</span> ../Gh_383.maf0.05.int0.8.fam <span class="dt">\</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">-p</span> ../pheo_av_raw.txt  <span class="dt">\</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">-o</span> ./result/result20230729</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>              </span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">## result </span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="bu">.</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Rutin_A11_all.nwk   <span class="co">## NJ tree</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Rutin_A11_all.phy   <span class="co">## phylo</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Rutin_A11_all.vcf.gz</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Rutin_A11_all.vcf.gz.tbi</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Rutin_A11_all_ComplexHeatmap.rds <span class="co">## Rdata for complexheatmap</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Rutin_A11_all_hclust.pdf         <span class="co">## ordered by hclust</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Rutin_A11_all_high_res.pdf       </span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Rutin_A11_all_order_phenotype.xlsx</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Rutin_A11_all_ordered_geno_num.xlsx</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Rutin_A11_all_raster.pdf</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> Rutin_A11_all_thin_high_res.pdf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 </section>
 <section id="进行ldblock可视化" class="level2">
 <h2 class="anchored" data-anchor-id="进行ldblock可视化">进行LDblock可视化</h2>
@@ -658,7 +763,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details>
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">LDBlockShow</span> <span class="at">-InGFF</span>  ~/GeekCloud/01.Database/Cotton/AD1/Gh.gff <span class="at">-Cutline</span> 6 <span class="at">-OutPdf</span> <span class="at">-SeleVar</span> 2 <span class="at">-TopSite</span> <span class="at">-InGenotype</span> A11_Gh_383_miss.geno <span class="at">--OutPut</span> Morin_A11_BGLU <span class="at">--InGWAS</span> A11_genotype.txt <span class="at">-Region</span> A11:91108756:91221656 <span class="kw">&amp;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ex">LDBlockShow</span> <span class="at">-InGFF</span>  ~/GeekCloud/01.Database/Cotton/AD1/Gh.gff <span class="at">-Cutline</span> 6 <span class="at">-OutPdf</span> <span class="at">-SeleVar</span> 2 <span class="at">-TopSite</span> <span class="at">-InGenotype</span> A11_Gh_383_miss.geno <span class="at">--OutPut</span> Morin_A11_BGLU <span class="at">--InGWAS</span> A11_genotype.txt <span class="at">-Region</span> A11:91108756:91221656 <span class="kw">&amp;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -693,23 +798,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     icon: icon
   };
   anchorJS.add('.anchored');
-  const isCodeAnnotation = (el) => {
-    for (const clz of el.classList) {
-      if (clz.startsWith('code-annotation-')) {                     
-        return true;
-      }
-    }
-    return false;
-  }
   const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
+    target: function(trigger) {
+      return trigger.previousElementSibling;
     }
   });
   clipboard.on('success', function(e) {
@@ -774,92 +865,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
-      let selectedAnnoteEl;
-      const selectorForAnnotation = ( cell, annotation) => {
-        let cellAttr = 'data-code-cell="' + cell + '"';
-        let lineAttr = 'data-code-annotation="' +  annotation + '"';
-        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-        return selector;
-      }
-      const selectCodeLines = (annoteEl) => {
-        const doc = window.document;
-        const targetCell = annoteEl.getAttribute("data-target-cell");
-        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-        const lineIds = lines.map((line) => {
-          return targetCell + "-" + line;
-        })
-        let top = null;
-        let height = null;
-        let parent = null;
-        if (lineIds.length > 0) {
-            //compute the position of the single el (top and bottom and make a div)
-            const el = window.document.getElementById(lineIds[0]);
-            top = el.offsetTop;
-            height = el.offsetHeight;
-            parent = el.parentElement.parentElement;
-          if (lineIds.length > 1) {
-            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-            height = bottom - top;
-          }
-          if (top !== null && height !== null && parent !== null) {
-            // cook up a div (if necessary) and position it 
-            let div = window.document.getElementById("code-annotation-line-highlight");
-            if (div === null) {
-              div = window.document.createElement("div");
-              div.setAttribute("id", "code-annotation-line-highlight");
-              div.style.position = 'absolute';
-              parent.appendChild(div);
-            }
-            div.style.top = top - 2 + "px";
-            div.style.height = height + 4 + "px";
-            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-            if (gutterDiv === null) {
-              gutterDiv = window.document.createElement("div");
-              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-              gutterDiv.style.position = 'absolute';
-              const codeCell = window.document.getElementById(targetCell);
-              const gutter = codeCell.querySelector('.code-annotation-gutter');
-              gutter.appendChild(gutterDiv);
-            }
-            gutterDiv.style.top = top - 2 + "px";
-            gutterDiv.style.height = height + 4 + "px";
-          }
-          selectedAnnoteEl = annoteEl;
-        }
-      };
-      const unselectCodeLines = () => {
-        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-        elementsIds.forEach((elId) => {
-          const div = window.document.getElementById(elId);
-          if (div) {
-            div.remove();
-          }
-        });
-        selectedAnnoteEl = undefined;
-      };
-      // Attach click handler to the DT
-      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-      for (const annoteDlNode of annoteDls) {
-        annoteDlNode.addEventListener('click', (event) => {
-          const clickedEl = event.target;
-          if (clickedEl !== selectedAnnoteEl) {
-            unselectCodeLines();
-            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-            if (activeEl) {
-              activeEl.classList.remove('code-annotation-active');
-            }
-            selectCodeLines(clickedEl);
-            clickedEl.classList.add('code-annotation-active');
-          } else {
-            // Unselect the line
-            unselectCodeLines();
-            clickedEl.classList.remove('code-annotation-active');
-          }
-        });
-      }
   const findCites = (el) => {
     const parentEl = el.parentElement;
     if (parentEl) {

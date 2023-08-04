@@ -127,7 +127,8 @@ conda clean -i #清理index cache
 ```{bash eval=F}
 #| code-fold: true
 #| code-summary: "Show the code"
-conda create -c bioconda -n gwas bcftools vcftools plink tassel admixture beagle fasttree tabix samtools gatk -y
+conda create -c bioconda -n gwas bcftools samtools openssl=1.0  -y
+conda install -c plink tassel admixture beagle fasttree tabix vcftools gatk -y
 #> 安装成功后可以看到以下提醒
 # To activate this environment, use
 #
@@ -199,6 +200,7 @@ emmax
 | 协变量文件格式化           | MakeEmmaxCov.R        | emmax-cov          | 修改协变量文件格式                         |
 | 表型数据文件格式化         | split_phenotype.R     | emmax-pheno-split  | 表型分割                                   |
 | 开始关联分析及下游文件生成 | run_emmax_pipeline.sh | run_emmax_pipeline | 数据准备好后执行该脚本会将下游分析一键完成 |
+| 基因型文件格式转换         | hap2geno.R            | hap2geno           | 将hapmap格式文件转换成LD block 需要的基因文件 |
 | 开始关联分析及下游文件生成 | EMMAX_DownStream.R    | emmax-down         | 已经被集成到run_emmax-pipeline             |
 | 区域单倍型划分             | emmax-haplotype.sh    | emmax-haplotype    | 根据候选区间进行单倍型划分                 |
 | 区域单倍型热图             | emmax-haploheatmap.R  | emmax-haploheatmap | 倍集成到emmax-haplotype                    |
@@ -218,6 +220,7 @@ echo "alias emmax-pheno-split='Rscript ~/src/emmax-pipeline/code/split_phenotype
 echo "alias run_emmax_pipeline='bash ~/src/emmax-pipeline/code/run_emmax_pipeline.sh'" >> ~/.bash_alias
 echo "alias emmax-haplotype='bash ~/src/emmax-pipeline/code/emmax-haplotype.sh'" >> ~/.bash_alias
 echo "alias emmax-haploheatmap='Rscript ~/src/emmax-pipeline/code/emmax-haploheatmap.R'" >> ~/.bash_alias
+echo "alias hap2geno='Rscript ~/src/emmax-pipeline/code/hap2geno.R'" >> ~/.bash_alias
 source ~/.bash_alias
 ```
 
@@ -435,6 +438,7 @@ run_emmax_pipeline \
 运行完毕得到的文件如下：
 
 ```{bash eval=FALSE}
+
 ── LDFilebyChr => #我们根据显染色体上显著位点的个数提取了前5个chr的基因型文件数据用来做LDblock
 │   ├── A01_genotype.txt
 │   ├── A11_genotype.txt
@@ -451,11 +455,58 @@ run_emmax_pipeline \
 
 ```
 
+## 生成LDblockShow需要的基因型文件
+
+`.geno` 
+
+chr|pos|genotype
+---|---|---
+A01|1|A C A C N C A C A A A A A...
+A01|2|C C A C N C A C C C N C N...
+A01|3|T A T N N T A T T T N T N...
+
+```{bash eval=FALSE}
+emmax-haplotype \
+              -e ../Gh_383.maf0.05.int0.8_sort.hmp.txt \
+              -s 1 \
+              -r chr_new.txt \
+              -t 8 \
+              -p "Gh_383"  
+
+```
+
+
 # Emmax 下游分析
 
 ## 确定LDblock画图范围
 
-首先可以通过Morin_Flower_miss_result_filter.xlsx 文件中连续高信号出现染色体位置划分范围。 其次可以通过用IGV看Morin_Flower_miss_result_filter.gwas 划定范围
+首先可以通过Morin_Flower_miss_result_filter.xlsx 文件中连续高信号出现染色体位置划分范围。 其次可以通过用IGV看Morin_Flower_miss_result_filter.gwas 划定范围,划定范围后我们根据前面生产的文件进行根据LDblock的单倍型划分，同时绘制系统进化树和单倍型划分热图。
+
+```{bash eval=FALSE}
+emmax-haplotype \
+              -v ../Gh_383.maf0.05.int0.8_sort.vcf.gz \
+              -r A06:85811843-91265283 \
+              -g ../08.LDGenotype/A06_Gh_383_miss.geno \
+              -f ../Gh_383.maf0.05.int0.8.fam \
+              -p ../pheo_av_raw.txt  \
+              -o ./result/result20230729
+              
+## result 
+.
+├── Rutin_A11_all.nwk   ## NJ tree
+├── Rutin_A11_all.phy   ## phylo
+├── Rutin_A11_all.vcf.gz
+├── Rutin_A11_all.vcf.gz.tbi
+├── Rutin_A11_all_ComplexHeatmap.rds ## Rdata for complexheatmap
+├── Rutin_A11_all_hclust.pdf         ## ordered by hclust
+├── Rutin_A11_all_high_res.pdf       
+├── Rutin_A11_all_order_phenotype.xlsx
+├── Rutin_A11_all_ordered_geno_num.xlsx
+├── Rutin_A11_all_raster.pdf
+├── Rutin_A11_all_thin_high_res.pdf
+```
+
+
 
 ## 进行LDblock可视化
 
