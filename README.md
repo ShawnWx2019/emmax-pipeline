@@ -12,14 +12,6 @@
 
 ![Overview](https://github.com/ShawnWx2019/emmax-pipeline/blob/main/www/Emmax-pipeline.png)
 
-```r
-suppressMessages(library(bruceR))
-suppressMessages(library(PCAtools))
-suppressMessages(library(tidymass))
-suppressMessages(library(tidyverse))
-suppressMessages(library(plotly))
-```
-
 # 环境配置和软件安装
 
 本流程需要在linux/Unix(MacOS)或者windows WSL环境下配置。建议通过`conda`完成环境搭建及软件安装。下面将讲解详细步骤。
@@ -30,11 +22,13 @@ suppressMessages(library(plotly))
 
 首先到清华镜像站下载miniconda安装包：[index of /annconda/miniconda](https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/?C=M&O=D)，根据自己操作系统类型选择**最新日期**对应的安装包。
 
-1.1 通过wget将Miniconda安装包下载到服务器； 1.2 添加执行权限，运行安装脚本，结束的时候注意不要选择随系统启动，以防conda污染环境变量 1.3 创建一个alias快捷启动conda 1.4 替换软件镜像
+1.1 通过wget将Miniconda安装包下载到服务器； 1.2 添加执行权限，运行安装脚本，结束的时候注意不要选择随系统启动，以防conda污染环境变量\
+1.3 创建一个alias快捷启动conda\
+1.4 替换软件镜像
 
 代码如下：
 
-```bash
+``` bash
 #| code-fold: true
 #| code-summary: "Show the code"
 #> 下载到电脑
@@ -96,7 +90,7 @@ conda clean -i #清理index cache
 做分析需要下面的软件：
 
 | 软件      | 作用                                                                    |
-|------------------------------------|------------------------------------|
+|-----------|-------------------------------------------------------------------------|
 | bcftools  | 操作vcf文件，包括修改染色体prefix，按区间提取，构建索引，过滤snp等      |
 | vcftools  | 和bcftools类似                                                          |
 | plink     | 将vcf转换为plink格式，然后进行vcf文件操作，emmax要求输入文件格式为plink |
@@ -111,7 +105,7 @@ conda clean -i #清理index cache
 
 代码如下：
 
-```bash
+``` bash
 #| code-fold: true
 #| code-summary: "Show the code"
 conda create -c bioconda -n gwas bcftools vcftools plink tassel admixture beagle fasttree tabix samtools gatk -y
@@ -133,7 +127,7 @@ emmax有可以直接在unbuntu20.04编译好的软件 直接下载，解压使�
 
 代码：
 
-```bash
+``` bash
 #| code-fold: true
 #| code-summary: "Show the code"
 wget http://csg.sph.umich.edu//kang/emmax/download/emmax-beta-07Mar2010.tar.gz
@@ -160,20 +154,20 @@ emmax
 #> 出现下面提示说明安装完毕
 # Usage: emmax [options]
 # Required parameters
-# 	-t [tpedf_prefix] : prefix for tped/tfam files
-# 	-o [out_prefix]  : output file name prefix
+#   -t [tpedf_prefix] : prefix for tped/tfam files
+#   -o [out_prefix]  : output file name prefix
 # Likely essential parameters
-# 	-p [phenof] : 3-column phenotype file with FAMID, INDID at the first two colmns, in the same order of .tfam file. Not required only with -K option	-k [kinf] : n * n matrix containing kinship values in the individual order consistent to [tpedf].tfam file. [tpedf].kinf will be used if not specified
-# 	-c [covf] : multi-column covariate file with FAMID, INDID at the first two colmns, in the same order of .tfam fileOptional parameters
+#   -p [phenof] : 3-column phenotype file with FAMID, INDID at the first two colmns, in the same order of .tfam file. Not required only with -K option  -k [kinf] : n * n matrix containing kinship values in the individual order consistent to [tpedf].tfam file. [tpedf].kinf will be used if not specified
+#   -c [covf] : multi-column covariate file with FAMID, INDID at the first two colmns, in the same order of .tfam fileOptional parameters
 # Optional parameters
-# 	-i [in_prefix] : input file name prefix including eigenvectors
-# 	-d [# digits]  : precision of the output values (default : 5)
-# 	-s [start index of SNP] : start index of SNP (default : 0)
-# 	-e [end index of SNP] : end index of SNP (default : #snps)
-# 	-w : flag for writing eigenvalues/eigenvector files
-# 	-D [delimiters] : delimter string in quotation marks
-# 	-P [# heaer cols in tped] : # of column headers in tped file
-# 	-F [# heaer cols in tfam] : # of column headers in tfam file
+#   -i [in_prefix] : input file name prefix including eigenvectors
+#   -d [# digits]  : precision of the output values (default : 5)
+#   -s [start index of SNP] : start index of SNP (default : 0)
+#   -e [end index of SNP] : end index of SNP (default : #snps)
+#   -w : flag for writing eigenvalues/eigenvector files
+#   -D [delimiters] : delimter string in quotation marks
+#   -P [# heaer cols in tped] : # of column headers in tped file
+#   -F [# heaer cols in tfam] : # of column headers in tfam file
 # Segmentation fault (core dumped)
 ```
 
@@ -182,7 +176,7 @@ emmax
 可以通过下载压缩包和通过git等方式将仓库代码下载到服务器，然后给脚本添加alias..
 
 | 步骤                       | 脚本名称              | alias              | 作用                                       |
-|------------------|------------------|------------------|------------------|
+|----------------------------|-----------------------|--------------------|--------------------------------------------|
 | 协变量文件格式化           | MakeEmmaxCov.R        | emmax-cov          | 修改协变量文件格式                         |
 | 表型数据文件格式化         | split_phenotype.R     | emmax-pheno-split  | 表型分割                                   |
 | 开始关联分析及下游文件生成 | run_emmax_pipeline.sh | run_emmax_pipeline | 数据准备好后执行该脚本会将下游分析一键完成 |
@@ -192,7 +186,7 @@ emmax
 
 代码：
 
-```bash
+``` bash
 #| code-fold: true
 #| code-summary: "Show the code"
 cd # 返回家目录
@@ -220,7 +214,7 @@ source ~/.bash_alias
 
 <font color=green>**第一步:**</font> 首先emmax要求染色体为纯数字，如果你发现GATK生成的vcf文件中染色体为"chr01"等并非纯数字时需要通过bcftools修改一下染色体。
 
-```bash
+``` bash
 #| code-fold: true
 #| code-summary: "Show the code"
 ##> GATK 一般不会给snp加ID，这里用bcftools对vcf文件中snp命名，方式为chr:pos
@@ -244,7 +238,7 @@ bcftools index -t raw_rename.vcf.gz
 
 <font color=green>**第二步:**</font> 用plink对vcf文件过滤，生成的`Gh_383.maf0.05.int0.8.vcf`
 
-```bash
+``` bash
 #| code-fold: true
 #| code-summary: "Show the code"
 plink --vcf raw_rename.vcf.gz --maf 0.05 --geno 0.2 --recode vcf-fid --out Gh_383.maf0.05.int0.8
@@ -254,7 +248,7 @@ plink --vcf Gh_383.maf0.05.int0.8.vcf --recode 12 transpose --output-missing-gen
 
 <font color=green>**第三步:**</font> 根据LD对SNP筛选，构建运行群体结构分析的基因型文件
 
-```bash
+``` bash
 #| code-fold: true
 #| code-summary: "Show the code"
 #> 过滤LD
@@ -271,7 +265,7 @@ plink -bfile Gh_383.maf0.05.int0.8.prune.in --recode 12 --out Gh_383.maf0.05.int
 
 通过下面代码进行admixture群体结构分析，根据结果选择合适的K值，然后选择对应的群体结构协变量文件
 
-```bash
+``` bash
 #| code-fold: true
 #| code-summary: "Show the code"
 for i in {1..20}
@@ -290,7 +284,7 @@ emmax-cov -n Gh_383.maf0.05.int0.8 \
 
 <font color=green>**第五步:**</font> 利用emmax-kin生成亲缘关系矩阵
 
-```bash
+``` bash
 #| code-fold: true
 #| code-summary: "Show the code"
 emmax-kin Gh_383.maf0.05.int0.8 -v -d 10
@@ -299,7 +293,7 @@ emmax-kin Gh_383.maf0.05.int0.8 -v -d 10
 
 至此运行emmax的基因型文件，协变量文件已经具备了。
 
-```yaml
+``` yaml
 (vep) shawn @ bio-Super-Server: 01.raw_g $ tree
 .
 ├── Cov_P3_emmax.cov # 协变量文件 PCA
@@ -321,7 +315,7 @@ emmax-kin Gh_383.maf0.05.int0.8 -v -d 10
 
 代码：
 
-```bash
+``` bash
 
 # 格式化
 grep -v "#" CRI_Gh_v2.gff3 | sort -k1,1 -k4,4n -k5,5n -t$'\t' | bgzip -c > data.gff.gz
@@ -343,7 +337,7 @@ vep -i  raw.vcf.gz  --gff data.gff.gz --fasta CRI_Gh_v2.fa --fork 4 --tab -o Gh_
 
 然后运行
 
-```bash
+``` bash
 emmax-pheon-split -t Gh_383.maf0.05.int0.8.tfam -p traits.txt
 ```
 
@@ -355,7 +349,7 @@ emmax-pheon-split -t Gh_383.maf0.05.int0.8.tfam -p traits.txt
 
 首先我们看下帮助文档
 
-```bash
+``` bash
 -------------------------------
 
 Emmax pipeline . From raw to Manhattan plot
@@ -407,7 +401,7 @@ Optional parameters:
 -   <font color=blue>**必选参数**</font> -t plink 生成的转置的emmax文件 -o 输出文件的前缀 -p 表型文件 -k 亲缘关系矩阵 -a 注释文件
 -   <font color=orange>**可选参数**</font> -c 协变量文件 -i 输出图片文件格式 -s 曼哈顿图点的大小 -w 显著位点点的颜色（-logp 4，6） -r 断点重新运行
 
-```bash
+``` bash
 run_emmax_pipeline \
   -t Gh_383.maf0.05.int0.8 \
   -o Morin_raw \
@@ -421,7 +415,7 @@ run_emmax_pipeline \
 
 运行完毕得到的文件如下：
 
-```bash
+``` bash
 ── LDFilebyChr => #我们根据显染色体上显著位点的个数提取了前5个chr的基因型文件数据用来做LDblock
 │   ├── A01_genotype.txt
 │   ├── A11_genotype.txt
@@ -434,8 +428,6 @@ run_emmax_pipeline \
 ├── Morin_Flower_miss_result_genotype_all.txt
 ├── QQplot.Morin_Flower_miss.jpg => #QQ 图
 └── Rectangular-Manhattan.Morin_Flower_miss.jpg => #曼哈顿图
-
-
 ```
 
 # Emmax 下游分析
@@ -450,6 +442,6 @@ run_emmax_pipeline \
 
 经过测试，报错的原因主要是染色体名字不符，许多软件在做gwas分析的时候都会改变chr的前缀，导致基因型文件中染色体标志和gff文件中的不符合，此时需要用bcftools重新修改基因型文件。
 
-```bash
+``` bash
 LDBlockShow -InGFF  ~/GeekCloud/01.Database/Cotton/AD1/Gh.gff -Cutline 6 -OutPdf -SeleVar 2 -TopSite -InGenotype A11_Gh_383_miss.geno --OutPut Morin_A11_BGLU --InGWAS A11_genotype.txt -Region A11:91108756:91221656 &
 ```
