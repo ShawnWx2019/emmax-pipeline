@@ -1215,6 +1215,7 @@ server <- function(input,output,session) {
                                column_title = paste0("SNP\n(Chr:",paste(ht_obj$regions,collapse = "_"),")"),
                                row_title = paste0("Sample\n(n = ",nrow(ht_obj$final_tbl),")"),border = T,border_gp = gpar(size = 1,color = 'black')
                              )
+                           ht_obj$ht = draw(ht_obj$ht)
                          }
                        } else if (i == 3) {
                          ht_obj$geno_num =
